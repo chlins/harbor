@@ -148,6 +148,29 @@ func (a *artifactAPI) GetArtifact(ctx context.Context, params operation.GetArtif
 	return operation.NewGetArtifactOK().WithPayload(art.ToSwagger())
 }
 
+func (a *artifactAPI) UpdateArtifact(ctx context.Context, params operation.UpdateArtifactParams) middleware.Responder {
+	if err := a.RequireProjectAccess(ctx, params.ProjectName, rbac.ActionRead, rbac.ResourceArtifact); err != nil {
+		return a.SendError(ctx, err)
+	}
+
+	// get the artifact
+	artifact, err := a.artCtl.GetByReference(ctx, fmt.Sprintf("%s/%s", params.ProjectName, params.RepositoryName), params.Reference, nil)
+	if err != nil {
+		return a.SendError(ctx, err)
+	}
+
+	art := &artifact.Artifact
+	art.RuntimeHook = params.Artifact.RuntimeHook
+	art.RuntimeHookMode = params.Artifact.RuntimeHookMode
+	art.RuntimeHookPoints = params.Artifact.RuntimeHookPoints
+
+	if err := a.artCtl.Update(ctx, art); err != nil {
+		return a.SendError(ctx, err)
+	}
+
+	return operation.NewUpdateArtifactOK()
+}
+
 func (a *artifactAPI) DeleteArtifact(ctx context.Context, params operation.DeleteArtifactParams) middleware.Responder {
 	if err := a.RequireProjectAccess(ctx, params.ProjectName, rbac.ActionDelete, rbac.ResourceArtifact); err != nil {
 		return a.SendError(ctx, err)

@@ -44,6 +44,11 @@ type Artifact struct {
 	PullTime          time.Time `orm:"column(pull_time)"`
 	ExtraAttrs        string    `orm:"column(extra_attrs)"`             // json string
 	Annotations       string    `orm:"column(annotations);type(jsonb)"` // json string
+
+	// runtime hook
+	RuntimeHook       bool   `orm:"column(runtime_hook)"`
+	RuntimeHookMode   string `orm:"column(runtime_hook_mode)"`
+	RuntimeHookPoints string `orm:"column(runtime_hook_points)"`
 }
 
 // TableName for artifact

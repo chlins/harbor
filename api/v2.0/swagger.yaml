@@ -1142,6 +1142,36 @@ paths:
           $ref: '#/responses/404'
         '500':
           $ref: '#/responses/500'
+    put:
+      summary: Update artifact
+      description: Update the artifact by reference
+      tags:
+        - artifact
+      operationId: updateArtifact
+      parameters:
+        - $ref: '#/parameters/requestId'
+        - $ref: '#/parameters/projectName'
+        - $ref: '#/parameters/repositoryName'
+        - $ref: '#/parameters/reference'
+        - name: artifact
+          in: body
+          description: The JSON object of repository.
+          required: true
+          schema:
+            $ref: '#/definitions/Artifact'
+      responses:
+        '200':
+          $ref: '#/responses/200'
+        '400':
+          $ref: '#/responses/400'
+        '401':
+          $ref: '#/responses/401'
+        '403':
+          $ref: '#/responses/403'
+        '404':
+          $ref: '#/responses/404'
+        '500':
+          $ref: '#/responses/500'
     delete:
       summary: Delete the specific artifact
       description: Delete the artifact specified by the reference under the project and repository. The reference can be digest or tag
@@ -6641,6 +6671,25 @@ definitions:
         items:
           $ref: '#/definitions/Accessory'
           description: The accessory of the artifact.
+      runtime_hook:
+        type: boolean
+        description: Whether enable the runtime hook
+      runtime_hook_mode:
+        type: string
+        enum:
+          - pass_through
+          - block
+        description: The mode of the runtime hook
+      runtime_hook_points:
+        type: array
+        description: The injection points for runtime hook
+        items:
+          type: string
+          enum:
+            - before_pull
+            - before_push
+            - after_pull
+            - after_push
   Tag:
     type: object
     properties:

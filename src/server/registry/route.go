@@ -27,6 +27,7 @@ import (
 	"github.com/goharbor/harbor/src/server/middleware/subject"
 	"github.com/goharbor/harbor/src/server/middleware/v2auth"
 	"github.com/goharbor/harbor/src/server/middleware/vulnerable"
+	"github.com/goharbor/harbor/src/server/middleware/wasmhook"
 	"github.com/goharbor/harbor/src/server/router"
 )
 
@@ -56,6 +57,7 @@ func RegisterRoutes() {
 		Middleware(repoproxy.ManifestMiddleware()).
 		Middleware(contenttrust.ContentTrust()).
 		Middleware(vulnerable.Middleware()).
+		Middleware(wasmhook.PullMiddleware()).
 		HandlerFunc(getManifest)
 	root.NewRoute().
 		Method(http.MethodHead).
@@ -81,6 +83,7 @@ func RegisterRoutes() {
 		Middleware(cosign.SignatureMiddleware()).
 		Middleware(subject.Middleware()).
 		Middleware(blob.PutManifestMiddleware()).
+		Middleware(wasmhook.PushMiddleware()).
 		HandlerFunc(putManifest)
 	// blob head
 	root.NewRoute().

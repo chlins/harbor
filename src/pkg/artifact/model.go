@@ -17,6 +17,7 @@ package artifact
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/docker/distribution/manifest/manifestlist"
@@ -46,6 +47,11 @@ type Artifact struct {
 	ExtraAttrs        map[string]interface{} `json:"extra_attrs"` // only contains the simple attributes specific for the different artifact type, most of them should come from the config layer
 	Annotations       map[string]string      `json:"annotations"`
 	References        []*Reference           `json:"references"` // child artifacts referenced by the parent artifact if the artifact is an index
+
+	// runtime hook
+	RuntimeHook       bool     `json:"runtime_hook"`
+	RuntimeHookMode   string   `json:"runtime_hook_mode"`
+	RuntimeHookPoints []string `json:"runtime_hook_points"`
 }
 
 func (a *Artifact) String() string {
@@ -85,6 +91,10 @@ func (a *Artifact) From(art *dao.Artifact) {
 			log.Errorf("failed to unmarshal the annotations of artifact %d: %v", art.ID, err)
 		}
 	}
+
+	a.RuntimeHook = art.RuntimeHook
+	a.RuntimeHookMode = art.RuntimeHookMode
+	a.RuntimeHookPoints = strings.Split(art.RuntimeHookPoints, ",")
 }
 
 // To converts the artifact to the database level object
@@ -103,6 +113,10 @@ func (a *Artifact) To() *dao.Artifact {
 		Icon:              a.Icon,
 		PushTime:          a.PushTime,
 		PullTime:          a.PullTime,
+
+		RuntimeHook:       a.RuntimeHook,
+		RuntimeHookMode:   a.RuntimeHookMode,
+		RuntimeHookPoints: strings.Join(a.RuntimeHookPoints, ","),
 	}
 	if len(a.ExtraAttrs) > 0 {
 		attrs, err := json.Marshal(a.ExtraAttrs)

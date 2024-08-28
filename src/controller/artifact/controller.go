@@ -118,6 +118,8 @@ type Controller interface {
 	Walk(ctx context.Context, root *Artifact, walkFn func(*Artifact) error, option *Option) error
 	// HasUnscannableLayer check artifact with digest if has unscannable layer
 	HasUnscannableLayer(ctx context.Context, dgst string) (bool, error)
+	// Update the artifact
+	Update(ctx context.Context, art *artifact.Artifact) error
 }
 
 // NewController creates an instance of the default artifact controller
@@ -781,4 +783,8 @@ func (c *controller) HasUnscannableLayer(ctx context.Context, dgst string) (bool
 		}
 	}
 	return false, nil
+}
+
+func (c *controller) Update(ctx context.Context, art *artifact.Artifact) error {
+	return c.artMgr.Update(ctx, art, "runtime_hook", "runtime_hook_mode", "runtime_hook_points")
 }
