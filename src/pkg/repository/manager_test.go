@@ -115,6 +115,13 @@ func (m *managerTestSuite) TestAddPullCount() {
 	m.dao.AssertExpectations(m.T())
 }
 
+func (m *managerTestSuite) TestTouch() {
+	m.dao.On("Touch", mock.Anything, mock.Anything).Return(nil)
+	err := m.mgr.Touch(context.Background(), 1)
+	m.Require().Nil(err)
+	m.dao.AssertExpectations(m.T())
+}
+
 func (m *managerTestSuite) TestNonEmptyRepos() {
 	repository := &model.RepoRecord{
 		RepositoryID: 1,

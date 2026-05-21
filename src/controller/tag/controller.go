@@ -28,6 +28,7 @@ import (
 	"github.com/goharbor/harbor/src/pkg/artifact"
 	"github.com/goharbor/harbor/src/pkg/immutable/match"
 	"github.com/goharbor/harbor/src/pkg/immutable/match/rule"
+	"github.com/goharbor/harbor/src/pkg/repository"
 	"github.com/goharbor/harbor/src/pkg/tag"
 	model_tag "github.com/goharbor/harbor/src/pkg/tag/model/tag"
 )
@@ -62,6 +63,7 @@ type Controller interface {
 func NewController() Controller {
 	return &controller{
 		tagMgr:       tag.Mgr,
+		repoMgr:      pkg.RepositoryMgr,
 		artMgr:       pkg.ArtifactMgr,
 		immutableMtr: rule.NewRuleMatcher(),
 	}
@@ -69,6 +71,7 @@ func NewController() Controller {
 
 type controller struct {
 	tagMgr       tag.Manager
+	repoMgr      repository.Manager
 	artMgr       artifact.Manager
 	immutableMtr match.ImmutableTagMatcher
 }
@@ -164,7 +167,14 @@ func (c *controller) Create(ctx context.Context, tag *Tag) (id int64, err error)
 	if !isValidTag(tag.Name) {
 		return 0, errors.BadRequestError(errors.Errorf("invalid tag name: %s", tag.Name))
 	}
-	return c.tagMgr.Create(ctx, &(tag.Tag))
+	id, err = c.tagMgr.Create(ctx, &(tag.Tag))
+	if err != nil {
+		return 0, err
+	}
+	if err = c.touchRepository(ctx, tag.RepositoryID); err != nil {
+		return 0, err
+	}
+	return id, nil
 }
 
 func isValidTag(name string) bool {
@@ -175,7 +185,24 @@ func isValidTag(name string) bool {
 
 // Update ...
 func (c *controller) Update(ctx context.Context, tag *Tag, props ...string) (err error) {
-	return c.tagMgr.Update(ctx, &tag.Tag, props...)
+	var existingRepoID int64
+	if tag.ID != 0 {
+		existing, err := c.tagMgr.Get(ctx, tag.ID)
+		if err != nil {
+			return err
+		}
+		existingRepoID = existing.RepositoryID
+	}
+	if err = c.tagMgr.Update(ctx, &tag.Tag, props...); err != nil {
+		return err
+	}
+	if err = c.touchRepository(ctx, existingRepoID); err != nil {
+		return err
+	}
+	if tag.RepositoryID != existingRepoID {
+		return c.touchRepository(ctx, tag.RepositoryID)
+	}
+	return nil
 }
 
 // Delete needs to check the signature and immutable status
@@ -191,7 +218,10 @@ func (c *controller) Delete(ctx context.Context, id int64) (err error) {
 		return errors.New(nil).WithCode(errors.PreconditionCode).
 			WithMessagef("the tag %s configured as immutable, cannot be deleted", tag.Name)
 	}
-	return c.tagMgr.Delete(ctx, id)
+	if err = c.tagMgr.Delete(ctx, id); err != nil {
+		return err
+	}
+	return c.touchRepository(ctx, tag.RepositoryID)
 }
 
 // DeleteTags ...
@@ -203,6 +233,13 @@ func (c *controller) DeleteTags(ctx context.Context, ids []int64) (err error) {
 		}
 	}
 	return nil
+}
+
+func (c *controller) touchRepository(ctx context.Context, repositoryID int64) error {
+	if c.repoMgr == nil || repositoryID <= 0 {
+		return nil
+	}
+	return c.repoMgr.Touch(ctx, repositoryID)
 }
 
 // assemble several part into a single tag

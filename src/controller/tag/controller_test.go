@@ -47,8 +47,10 @@ func (c *controllerTestSuite) SetupTest() {
 	c.artMgr = &artifact.Manager{}
 	c.tagMgr = &tagtesting.Manager{}
 	c.immutableMtr = &immutable.FakeMatcher{}
+	mock.OnAnything(c.repoMgr, "Touch").Return(nil)
 	c.ctl = &controller{
 		tagMgr:       c.tagMgr,
+		repoMgr:      c.repoMgr,
 		artMgr:       c.artMgr,
 		immutableMtr: c.immutableMtr,
 	}
@@ -84,6 +86,7 @@ func (c *controllerTestSuite) TestEnsureTag() {
 			Name:         "latest",
 		},
 	}, nil)
+	c.tagMgr.On("Get", mock.Anything, mock.Anything).Return(&tag.Tag{RepositoryID: 1}, nil)
 	c.tagMgr.On("Update", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
 	c.artMgr.On("Get", mock.Anything, mock.Anything).Return(&pkg_artifact.Artifact{
 		ID: 1,
@@ -172,6 +175,7 @@ func (c *controllerTestSuite) TestDeleteImmutable() {
 }
 
 func (c *controllerTestSuite) TestUpdate() {
+	c.tagMgr.On("Get", mock.Anything, mock.Anything).Return(&tag.Tag{RepositoryID: 1}, nil)
 	mock.OnAnything(c.tagMgr, "Update").Return(nil)
 	err := c.ctl.Update(nil, &Tag{
 		Tag: tag.Tag{

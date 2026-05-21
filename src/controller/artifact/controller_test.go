@@ -92,6 +92,7 @@ func (c *controllerTestSuite) SetupTest() {
 	c.accMgr = &accessorytesting.Manager{}
 	c.regCli = &registry.Client{}
 	c.proCtl = &projecttesting.Controller{}
+	c.repoMgr.On("Touch", mock.Anything, mock.Anything).Return(nil).Maybe()
 	c.ctl = &controller{
 		repoMgr:      c.repoMgr,
 		artMgr:       c.artMgr,
@@ -637,6 +638,7 @@ func (c *controllerTestSuite) TestCopy() {
 
 func (c *controllerTestSuite) TestUpdatePullTime() {
 	// artifact ID and tag ID matches
+	c.artMgr.On("Get", mock.Anything, mock.Anything).Return(&artifact.Artifact{RepositoryID: 1}, nil)
 	c.tagCtl.On("Get").Return(&tag.Tag{
 		Tag: model_tag.Tag{
 			ID:         1,
@@ -654,6 +656,7 @@ func (c *controllerTestSuite) TestUpdatePullTime() {
 	c.SetupTest()
 
 	// artifact ID and tag ID doesn't match
+	c.artMgr.On("Get", mock.Anything, mock.Anything).Return(&artifact.Artifact{RepositoryID: 1}, nil)
 	c.tagCtl.On("Get").Return(&tag.Tag{
 		Tag: model_tag.Tag{
 			ID:         1,
@@ -668,6 +671,7 @@ func (c *controllerTestSuite) TestUpdatePullTime() {
 	// if no tag, should not update tag
 	c.SetupTest()
 	c.tagCtl.On("Update").Return(nil)
+	c.artMgr.On("Get", mock.Anything, mock.Anything).Return(&artifact.Artifact{RepositoryID: 1}, nil)
 	c.artMgr.On("UpdatePullTime", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 	err = c.ctl.UpdatePullTime(nil, 1, 0, time.Now())
 	c.Require().Nil(err)
@@ -684,12 +688,14 @@ func (c *controllerTestSuite) TestGetAddition() {
 
 func (c *controllerTestSuite) TestAddTo() {
 	c.labelMgr.On("AddTo", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+	c.artMgr.On("Get", mock.Anything, mock.Anything).Return(&artifact.Artifact{RepositoryID: 1}, nil)
 	err := c.ctl.AddLabel(context.Background(), 1, 1)
 	c.Require().Nil(err)
 }
 
 func (c *controllerTestSuite) TestRemoveFrom() {
 	c.labelMgr.On("RemoveFrom", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+	c.artMgr.On("Get", mock.Anything, mock.Anything).Return(&artifact.Artifact{RepositoryID: 1}, nil)
 	err := c.ctl.RemoveLabel(nil, 1, 1)
 	c.Require().Nil(err)
 }

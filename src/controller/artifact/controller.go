@@ -248,7 +248,7 @@ func (c *controller) ensureArtifact(ctx context.Context, repository, digest stri
 		}
 		created = true
 		artifact.ID = id
-		return nil
+		return c.touchRepository(ctx, artifact.RepositoryID)
 	})(orm.SetTransactionOpNameToContext(ctx, "tx-ensure-artifact")); err != nil {
 		// got error that isn't conflict error, return directly
 		if !errors.IsConflictErr(err) {
@@ -439,6 +439,9 @@ func (c *controller) deleteDeeply(ctx context.Context, id int64, isRoot, isAcces
 		}
 		return err
 	}
+	if err = c.touchRepository(ctx, art.RepositoryID); err != nil {
+		return err
+	}
 
 	blobs, err := c.blobMgr.List(ctx, q.New(q.KeyWords{"artifactDigest": art.Digest}))
 	if err != nil {
@@ -587,7 +590,14 @@ ensureArt:
 }
 
 func (c *controller) UpdatePullTime(ctx context.Context, artifactID int64, tagID int64, time time.Time) error {
+	art, err := c.artMgr.Get(ctx, artifactID)
+	if err != nil {
+		return err
+	}
 	if err := c.artMgr.UpdatePullTime(ctx, artifactID, time); err != nil {
+		return err
+	}
+	if err := c.touchRepository(ctx, art.RepositoryID); err != nil {
 		return err
 	}
 	// update tag pull time if artifact has tag
@@ -638,11 +648,33 @@ func (c *controller) AddLabel(ctx context.Context, artifactID int64, labelID int
 		}
 	}()
 	err = c.labelMgr.AddTo(ctx, labelID, artifactID)
+	if err != nil {
+		return
+	}
+	err = c.touchRepositoryByArtifactID(ctx, artifactID)
 	return
 }
 
 func (c *controller) RemoveLabel(ctx context.Context, artifactID int64, labelID int64) error {
-	return c.labelMgr.RemoveFrom(ctx, labelID, artifactID)
+	if err := c.labelMgr.RemoveFrom(ctx, labelID, artifactID); err != nil {
+		return err
+	}
+	return c.touchRepositoryByArtifactID(ctx, artifactID)
+}
+
+func (c *controller) touchRepositoryByArtifactID(ctx context.Context, artifactID int64) error {
+	art, err := c.artMgr.Get(ctx, artifactID)
+	if err != nil {
+		return err
+	}
+	return c.touchRepository(ctx, art.RepositoryID)
+}
+
+func (c *controller) touchRepository(ctx context.Context, repositoryID int64) error {
+	if c.repoMgr == nil || repositoryID <= 0 {
+		return nil
+	}
+	return c.repoMgr.Touch(ctx, repositoryID)
 }
 
 func (c *controller) Walk(ctx context.Context, root *Artifact, walkFn func(*Artifact) error, option *Option) error {

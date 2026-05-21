@@ -129,6 +129,20 @@ func (m *managerTestSuite) TestAddPullCount() {
 	m.cache.AssertCalled(m.T(), "Delete", mock.Anything, mock.Anything)
 }
 
+func (m *managerTestSuite) TestTouch() {
+	repo := &model.RepoRecord{RepositoryID: 100, Name: "library/hello-world"}
+	m.cache.On("Fetch", mock.Anything, mock.Anything, mock.Anything).Return(cache.ErrNotFound).Once()
+	m.cache.On("Save", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Once()
+	m.repoMgr.On("Get", mock.Anything, int64(100)).Return(repo, nil).Once()
+	m.repoMgr.On("Touch", mock.Anything, int64(100)).Return(nil).Once()
+	m.cache.On("Delete", mock.Anything, mock.Anything).Return(nil).Twice()
+
+	err := m.cachedManager.Touch(m.ctx, 100)
+	m.NoError(err)
+	m.repoMgr.AssertCalled(m.T(), "Touch", mock.Anything, int64(100))
+	m.cache.AssertCalled(m.T(), "Delete", mock.Anything, mock.Anything)
+}
+
 func (m *managerTestSuite) TestCount() {
 	m.repoMgr.On("Count", mock.Anything, mock.Anything).Return(int64(1), nil)
 	c, err := m.cachedManager.Count(m.ctx, nil)

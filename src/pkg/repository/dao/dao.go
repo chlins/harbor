@@ -42,6 +42,8 @@ type DAO interface {
 	Update(ctx context.Context, repository *model.RepoRecord, props ...string) (err error)
 	// AddPullCount increase pull count for the specified repository
 	AddPullCount(ctx context.Context, id int64, count uint64) error
+	// Touch updates the update_time of the specified repository.
+	Touch(ctx context.Context, id int64) error
 	// NonEmptyRepos returns the repositories without any artifact or all the artifacts are untagged.
 	NonEmptyRepos(ctx context.Context) ([]*model.RepoRecord, error)
 }
@@ -150,6 +152,21 @@ func (d *dao) AddPullCount(ctx context.Context, id int64, count uint64) error {
 		return errors.New(nil).WithMessagef("failed to increase repository pull count: %d", id)
 	}
 	return nil
+}
+
+func (d *dao) Touch(ctx context.Context, id int64) error {
+	if id <= 0 {
+		return nil
+	}
+
+	ormer, err := orm.FromContext(ctx)
+	if err != nil {
+		return err
+	}
+	_, err = ormer.QueryTable(new(model.RepoRecord)).Filter("RepositoryID", id).Update(o.Params{
+		"update_time": time.Now(),
+	})
+	return err
 }
 
 func (d *dao) NonEmptyRepos(ctx context.Context) ([]*model.RepoRecord, error) {

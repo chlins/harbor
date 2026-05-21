@@ -162,18 +162,31 @@ func (m *Manager) AddPullCount(ctx context.Context, id int64, count uint64) erro
 	return nil
 }
 
+func (m *Manager) Touch(ctx context.Context, id int64) error {
+	if id <= 0 {
+		return nil
+	}
+
+	repo, err := m.Get(ctx, id)
+	if err != nil {
+		log.Debugf("get repository %d before touching cache error: %v", id, err)
+	}
+
+	if err := m.delegator.Touch(ctx, id); err != nil {
+		return err
+	}
+
+	if repo != nil {
+		m.cleanUp(ctx, repo)
+	} else {
+		m.cleanUpByID(ctx, id)
+	}
+	return nil
+}
+
 // cleanUp cleans up data in cache.
 func (m *Manager) cleanUp(ctx context.Context, repo *model.RepoRecord) {
-	// clean index by id
-	idIdx, err := m.keyBuilder.Format("id", repo.RepositoryID)
-	if err != nil {
-		log.Errorf("format repository id key error: %v", err)
-	} else {
-		// retry to avoid dirty data
-		if err = retry.Retry(func() error { return m.CacheClient(ctx).Delete(ctx, idIdx) }); err != nil {
-			log.Errorf("delete repository cache key %s error: %v", idIdx, err)
-		}
-	}
+	m.cleanUpByID(ctx, repo.RepositoryID)
 
 	// clean index by name
 	nameIdx, err := m.keyBuilder.Format("name", repo.Name)
@@ -183,6 +196,18 @@ func (m *Manager) cleanUp(ctx context.Context, repo *model.RepoRecord) {
 		if err = retry.Retry(func() error { return m.CacheClient(ctx).Delete(ctx, nameIdx) }); err != nil {
 			log.Errorf("delete repository cache key %s error: %v", nameIdx, err)
 		}
+	}
+}
+
+func (m *Manager) cleanUpByID(ctx context.Context, id int64) {
+	idIdx, err := m.keyBuilder.Format("id", id)
+	if err != nil {
+		log.Errorf("format repository id key error: %v", err)
+		return
+	}
+	// retry to avoid dirty data
+	if err = retry.Retry(func() error { return m.CacheClient(ctx).Delete(ctx, idIdx) }); err != nil {
+		log.Errorf("delete repository cache key %s error: %v", idIdx, err)
 	}
 }
 
