@@ -214,11 +214,18 @@ func (s *controllerTestSuite) TestDeletePolicy() {
 func (s *controllerTestSuite) TestStart() {
 	mock.OnAnything(s.regMgr, "Get").Return(s.hfRegistry(), nil)
 	mock.OnAnything(s.projectCtl, "Get").Return(&models.Project{ProjectID: 1, Name: "library"}, nil)
-	mock.OnAnything(s.execMgr, "Create").Return(int64(10), nil)
-	mock.OnAnything(s.execMgr, "Count").Return(int64(0), nil)
-	var created *task.Job
+	// the running count must be taken before the new execution is created,
+	// otherwise the new record counts itself and every run is skipped
+	created := false
+	s.execMgr.On("Count", tmock.Anything, tmock.Anything).Run(func(tmock.Arguments) {
+		s.False(created, "Count must be called before Create")
+	}).Return(int64(0), nil)
+	s.execMgr.On("Create", tmock.Anything, tmock.Anything, tmock.Anything, tmock.Anything, tmock.Anything).Run(func(tmock.Arguments) {
+		created = true
+	}).Return(int64(10), nil)
+	var createdJob *task.Job
 	s.taskMgr.On("Create", tmock.Anything, int64(10), tmock.Anything, tmock.Anything).Run(func(args tmock.Arguments) {
-		created = args.Get(2).(*task.Job)
+		createdJob = args.Get(2).(*task.Job)
 	}).Return(int64(11), nil)
 
 	p := s.policy()
@@ -227,14 +234,14 @@ func (s *controllerTestSuite) TestStart() {
 	id, err := s.ctl.Start(context.TODO(), p, task.ExecutionTriggerManual)
 	s.Require().NoError(err)
 	s.Equal(int64(10), id)
-	s.Require().NotNil(created)
-	s.Equal(job.ModelSyncVendorType, created.Name)
-	s.Equal("Qwen/Qwen3-8B", created.Parameters[modelsyncjob.ParamSrcRepository])
-	s.Equal("library/qwen/qwen3-8b", created.Parameters[modelsyncjob.ParamDestRepository])
-	s.Equal("abc", created.Parameters[modelsyncjob.ParamLastSyncedRevision])
-	s.Equal(`["*.safetensors"]`, created.Parameters[modelsyncjob.ParamFileFilters])
+	s.Require().NotNil(createdJob)
+	s.Equal(job.ModelSyncVendorType, createdJob.Name)
+	s.Equal("Qwen/Qwen3-8B", createdJob.Parameters[modelsyncjob.ParamSrcRepository])
+	s.Equal("library/qwen/qwen3-8b", createdJob.Parameters[modelsyncjob.ParamDestRepository])
+	s.Equal("abc", createdJob.Parameters[modelsyncjob.ParamLastSyncedRevision])
+	s.Equal(`["*.safetensors"]`, createdJob.Parameters[modelsyncjob.ParamFileFilters])
 	reg := &regmodel.Registry{}
-	s.Require().NoError(json.Unmarshal([]byte(created.Parameters[modelsyncjob.ParamRegistry].(string)), reg))
+	s.Require().NoError(json.Unmarshal([]byte(createdJob.Parameters[modelsyncjob.ParamRegistry].(string)), reg))
 	s.Equal("secret", reg.Credential.AccessSecret, "the job needs the credential")
 
 	// disabled
