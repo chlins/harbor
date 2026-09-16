@@ -56,6 +56,7 @@ import (
 	"github.com/goharbor/harbor/src/lib/errors"
 	"github.com/goharbor/harbor/src/lib/metric"
 	redislib "github.com/goharbor/harbor/src/lib/redis"
+	modelsync "github.com/goharbor/harbor/src/pkg/modelsync/job"
 	"github.com/goharbor/harbor/src/pkg/p2p/preheat"
 	"github.com/goharbor/harbor/src/pkg/queuestatus"
 	"github.com/goharbor/harbor/src/pkg/retention"
@@ -323,6 +324,7 @@ func (bs *Bootstrap) loadAndRunRedisWorkerPool(
 			job.WebhookJobVendorType:        (*notification.WebhookJob)(nil),
 			job.SlackJobVendorType:          (*notification.SlackJob)(nil),
 			job.P2PPreheatVendorType:        (*preheat.Job)(nil),
+			job.ModelSyncVendorType:         (*modelsync.Job)(nil),
 			job.ScanDataExportVendorType:    (*scandataexport.ScanDataExport)(nil),
 			// In v2.2 we migrate the scheduled replication, garbage collection and scan all to
 			// the scheduler mechanism, the following three jobs are kept for the legacy jobs
