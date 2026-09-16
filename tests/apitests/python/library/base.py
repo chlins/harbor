@@ -59,6 +59,7 @@ def _create_client(server, credential, debug, api_type):
         "scanall": v2_swagger_client.ScanAllApi(v2_swagger_client.ApiClient(cfg)),
         "scanner": v2_swagger_client.ScannerApi(v2_swagger_client.ApiClient(cfg)),
         "replication": v2_swagger_client.ReplicationApi(v2_swagger_client.ApiClient(cfg)),
+        "model_sync": v2_swagger_client.ModelSyncApi(v2_swagger_client.ApiClient(cfg)),
         "registry": v2_swagger_client.RegistryApi(v2_swagger_client.ApiClient(cfg)),
         "robot": v2_swagger_client.RobotApi(v2_swagger_client.ApiClient(cfg)),
         "gc": v2_swagger_client.GcApi(v2_swagger_client.ApiClient(cfg)),

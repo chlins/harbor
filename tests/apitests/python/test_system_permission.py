@@ -221,6 +221,70 @@ list_replication_execution_tasks = Permission("{}/replication/executions/{}/task
 read_replication_execution_task = Permission("{}/replication/executions/{}/tasks/{}".format(harbor_base_url, ID_PLACEHOLDER, 1), "GET", 404, replication_execution_payload, payload_id_field="id")
 # replication permissions end
 
+# model sync policy permissions start
+model_sync_registry_id = None
+if "model-sync-policy" in resources or "model-sync" in resources or "all" == resources:
+    model_sync_registry_payload = {
+        "credential": {
+            "access_key": "token",
+            "access_secret": "",
+            "type": "basic"
+        },
+        "description": "",
+        "insecure": False,
+        "name": "model-sync-registry-{}".format(random.randint(1000, 9999)),
+        "type": "huggingface",
+        "url": "https://huggingface.co"
+    }
+    response = requests.post("{}/registries".format(harbor_base_url), data=json.dumps(model_sync_registry_payload), verify=False, auth=(admin_user_name, admin_password), headers={"Content-Type": "application/json"})
+    model_sync_registry_id = int(response.headers["Location"].split("/")[-1])
+model_sync_policy_payload = {
+    "name": "model-sync-policy-{}".format(random.randint(1000, 9999)),
+    "registry_id": model_sync_registry_id,
+    "src_repository": "hf-internal-testing/tiny-random-gpt2",
+    "src_revision": "",
+    "file_filters": ["*.json"],
+    "dest_project_id": 1,
+    "dest_repository": "",
+    "trigger": {
+        "type": "manual"
+    },
+    "enabled": True
+}
+create_model_sync_policy = Permission("{}/model-sync/policies".format(harbor_base_url), "POST", 201, model_sync_policy_payload, "id", id_from_header=True)
+list_model_sync_policy = Permission("{}/model-sync/policies".format(harbor_base_url), "GET", 200, model_sync_policy_payload)
+read_model_sync_policy = Permission("{}/model-sync/policies/{}".format(harbor_base_url, ID_PLACEHOLDER), "GET", 200, model_sync_policy_payload, payload_id_field="id")
+update_model_sync_policy = Permission("{}/model-sync/policies/{}".format(harbor_base_url, ID_PLACEHOLDER), "PUT", 200, model_sync_policy_payload, payload_id_field="id")
+list_model_sync_adapters = Permission("{}/model-sync/adapters".format(harbor_base_url), "GET", 200)
+delete_model_sync_policy = Permission("{}/model-sync/policies/{}".format(harbor_base_url, ID_PLACEHOLDER), "DELETE", 200, model_sync_policy_payload, payload_id_field="id")
+# model sync policy permissions end
+
+# model sync permissions start
+model_sync_policy_id = None
+if "model-sync" in resources or "all" == resources:
+    model_sync_exec_policy_payload = {
+        "name": "model-sync-policy-{}".format(random.randint(1000, 9999)),
+        "registry_id": model_sync_registry_id,
+        "src_repository": "hf-internal-testing/tiny-random-gpt2",
+        "file_filters": ["*.json"],
+        "dest_project_id": 1,
+        "trigger": {
+            "type": "manual"
+        },
+        "enabled": True
+    }
+    response = requests.post("{}/model-sync/policies".format(harbor_base_url), data=json.dumps(model_sync_exec_policy_payload), verify=False, auth=(admin_user_name, admin_password), headers={"Content-Type": "application/json"})
+    model_sync_policy_id = int(response.headers["Location"].split("/")[-1])
+model_sync_execution_payload = {
+    "id": model_sync_policy_id
+}
+list_model_sync_execution = Permission("{}/model-sync/policies/{}/executions".format(harbor_base_url, ID_PLACEHOLDER), "GET", 200, model_sync_execution_payload, payload_id_field="id")
+read_model_sync_execution = Permission("{}/model-sync/executions/{}".format(harbor_base_url, "88888888"), "GET", 404, model_sync_execution_payload)
+list_model_sync_execution_tasks = Permission("{}/model-sync/executions/{}/tasks".format(harbor_base_url, "88888888"), "GET", 404, model_sync_execution_payload)
+read_model_sync_execution_task_log = Permission("{}/model-sync/executions/{}/tasks/{}/log".format(harbor_base_url, "88888888", 1), "GET", 404, model_sync_execution_payload)
+stop_model_sync_execution = Permission("{}/model-sync/executions/{}".format(harbor_base_url, "88888888"), "PUT", 404, model_sync_execution_payload)
+# model sync permissions end
+
 # scan all permissions start
 scan_all_weekly_schedule_payload = {
     "schedule": {
@@ -350,6 +414,8 @@ resource_permissions = {
     "replication-adapter": [list_replication_adapters, list_replication_adapterinfos],
     "replication-policy": [create_replication_policy, list_replication_policy, read_replication_policy, update_replication_policy, delete_replication_policy],
     "replication": [create_replication_execution, list_replication_execution, read_replication_execution, stop_replication_execution, list_replication_execution_tasks, read_replication_execution_task],
+    "model-sync-policy": [create_model_sync_policy, list_model_sync_policy, read_model_sync_policy, update_model_sync_policy, list_model_sync_adapters, delete_model_sync_policy],
+    "model-sync": [list_model_sync_execution, read_model_sync_execution, list_model_sync_execution_tasks, read_model_sync_execution_task_log, stop_model_sync_execution],
     "scan-all": [create_scan_all_schedule, update_scan_all_schedule, stop_scan_all, scan_all_metrics, scan_all_schedule_metrics],
     "system-volumes": [read_system_volumes],
     "jobservice-monitor": [list_jobservice_pool, list_jobservice_pool_worker, stop_jobservice_job, get_jobservice_job_log, list_jobservice_queue, stop_jobservice],

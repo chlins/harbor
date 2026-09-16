@@ -164,6 +164,10 @@ Test Case - P2P
     [Tags]  p2p
     Harbor API Test  ./tests/apitests/python/test_p2p.py
 
+Test Case - Model Sync From Hugging Face
+    [Tags]  model_sync
+    Harbor API Test  ./tests/apitests/python/test_model_sync.py
+
 Test Case - Metrics
     [Tags]  metrics
     Harbor API Test  ./tests/apitests/python/test_verify_metrics_enabled.py
