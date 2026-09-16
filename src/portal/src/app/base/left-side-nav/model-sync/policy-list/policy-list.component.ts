@@ -11,7 +11,13 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { Component, OnDestroy, ViewChild } from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    OnDestroy,
+    Output,
+    ViewChild,
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { ClrDatagridStateInterface } from '@clr/angular';
 import { TranslateService } from '@ngx-translate/core';
@@ -37,11 +43,16 @@ import {
     setPageSizeToLocalStorage,
 } from '../../../../shared/units/utils';
 import { CreateEditModelSyncPolicyComponent } from '../create-edit-policy/create-edit-policy.component';
-import {
-    isExecutionInProgress,
-    statusI18nKey,
-    TRIGGER_SCHEDULED,
-} from '../model-sync';
+import { isExecutionInProgress, TRIGGER_SCHEDULED } from '../model-sync';
+
+const ONE_MINUTE_SECONDS = 60;
+const STATUS_MAP = {
+    Succeed: 'Succeeded',
+};
+const TRIGGER_I18N_MAP = {
+    manual: 'REPLICATION.MANUAL',
+    scheduled: 'REPLICATION.SCHEDULED',
+};
 
 @Component({
     selector: 'model-sync-policy-list',
@@ -50,6 +61,7 @@ import {
     standalone: false,
 })
 export class ModelSyncPolicyListComponent implements OnDestroy {
+    @Output() goToRegistry = new EventEmitter<void>();
     clrPageSizeOptions: number[] = PAGE_SIZE_OPTIONS;
 
     // policies
@@ -76,6 +88,9 @@ export class ModelSyncPolicyListComponent implements OnDestroy {
     executionsTotal: number = 0;
     executionsTimeout: any;
     stopOnGoing: boolean = false;
+    isOpenFilterTag: boolean = false;
+    currentTerm: string = '';
+    defaultFilter: string = 'trigger';
 
     @ViewChild(CreateEditModelSyncPolicyComponent)
     createEditPolicy: CreateEditModelSyncPolicyComponent;
@@ -177,18 +192,17 @@ export class ModelSyncPolicyListComponent implements OnDestroy {
         this.clrLoadPolicies({ page: {} });
     }
 
-    triggerLabel(policy: ModelSyncPolicy): string {
-        if (!policy || !policy.trigger) {
-            return '';
-        }
-        if (policy.trigger.type === TRIGGER_SCHEDULED) {
-            return policy.trigger.trigger_settings?.cron || '';
-        }
-        return '';
+    triggerI18n(policy: ModelSyncPolicy): string {
+        const type = policy?.trigger?.type;
+        return type ? TRIGGER_I18N_MAP[type] || type : '';
     }
 
     isScheduled(policy: ModelSyncPolicy): boolean {
         return !!policy?.trigger && policy.trigger.type === TRIGGER_SCHEDULED;
+    }
+
+    truncatedDescription(desc: string): string {
+        return desc.length > 35 ? desc.substr(0, 35) : desc;
     }
 
     destination(policy: ModelSyncPolicy): string {
@@ -198,6 +212,11 @@ export class ModelSyncPolicyListComponent implements OnDestroy {
         const project =
             policy.dest_project_name || `#${policy.dest_project_id}`;
         return `${project}/${policy.dest_repository || ''}`;
+    }
+
+    goRegistry(): void {
+        this.goToRegistry.emit();
+        this.router.navigate(['harbor', 'registries']);
     }
 
     revision(policy: ModelSyncPolicy): string {
@@ -353,13 +372,25 @@ export class ModelSyncPolicyListComponent implements OnDestroy {
             this.executionsLoading = true;
         }
         const policyId = this.selectedPolicy.id;
+        const params: ModelSyncService.ListModelSyncExecutionsParams = {
+            id: policyId,
+            page: this.executionsPage,
+            pageSize: this.executionsPageSize,
+            sort: getSortingString(state) || '-start_time',
+        };
+        if (this.currentTerm) {
+            if (this.defaultFilter === 'trigger') {
+                params.trigger = this.currentTerm;
+            } else {
+                // convert 'Succeeded' back to the API status
+                params.status =
+                    this.currentTerm === STATUS_MAP.Succeed
+                        ? 'Succeed'
+                        : this.currentTerm;
+            }
+        }
         this.modelSyncService
-            .listModelSyncExecutionsResponse({
-                id: policyId,
-                page: this.executionsPage,
-                pageSize: this.executionsPageSize,
-                sort: getSortingString(state) || '-start_time',
-            })
+            .listModelSyncExecutionsResponse(params)
             .pipe(finalize(() => (this.executionsLoading = false)))
             .subscribe(
                 res => {
@@ -382,7 +413,54 @@ export class ModelSyncPolicyListComponent implements OnDestroy {
 
     refreshExecutions(): void {
         this.executionsPage = 1;
+        this.currentTerm = '';
         this.clrLoadExecutions(true, { page: {} });
+    }
+
+    doSearchExecutions(terms: string): void {
+        this.currentTerm = (terms || '').trim();
+        this.executionsPage = 1;
+        this.clrLoadExecutions(true, { page: {} });
+    }
+
+    doFilterExecutions($event: any): void {
+        this.defaultFilter = $event['target'].value;
+        this.doSearchExecutions(this.currentTerm);
+    }
+
+    openFilter(isOpen: boolean): void {
+        this.isOpenFilterTag = isOpen;
+    }
+
+    getStatusStr(status: string, statusText: string): string {
+        // an execution marked as failed with "Execution skipped" was skipped, not failed
+        if (
+            status === 'Failed' &&
+            statusText &&
+            statusText.startsWith('Execution skipped')
+        ) {
+            return 'Skipped';
+        }
+        return STATUS_MAP[status] || status;
+    }
+
+    getDuration(e: ModelSyncExecution): string {
+        if (!e || !e.start_time) {
+            return '-';
+        }
+        const start = new Date(e.start_time).getTime();
+        const end = e.end_time ? new Date(e.end_time).getTime() : Date.now();
+        const diff = end - start;
+        const seconds = diff / 1000;
+        const minutes = Math.floor(seconds / ONE_MINUTE_SECONDS);
+        const remain = Math.floor(seconds % ONE_MINUTE_SECONDS);
+        if (minutes > 0) {
+            return remain === 0 ? minutes + 'm' : minutes + 'm' + remain + 's';
+        }
+        if (remain > 0) {
+            return remain + 's';
+        }
+        return diff > 0 ? diff + 'ms' : '-';
     }
 
     clearExecutionsTimeout(): void {
@@ -458,13 +536,5 @@ export class ModelSyncPolicyListComponent implements OnDestroy {
             execution.id,
             'tasks',
         ]);
-    }
-
-    statusKey(status: string): string {
-        return statusI18nKey(status);
-    }
-
-    triggerKey(trigger: string): string {
-        return trigger ? 'MODEL_SYNC.TRIGGER_' + trigger.toUpperCase() : '';
     }
 }

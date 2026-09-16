@@ -20,7 +20,6 @@ import {
     isExecutionInProgress,
     isTaskInProgress,
     parseFileFilters,
-    statusI18nKey,
 } from './model-sync';
 
 describe('ModelSyncPageComponent', () => {
@@ -56,8 +55,6 @@ describe('model sync helpers', () => {
     });
 
     it('should map statuses', () => {
-        expect(statusI18nKey('Succeed')).toEqual('MODEL_SYNC.SUCCEEDED');
-        expect(statusI18nKey('Other')).toEqual('Other');
         expect(isExecutionInProgress({ status: 'InProgress' })).toBeTrue();
         expect(isExecutionInProgress({ status: 'Succeed' })).toBeFalse();
         expect(isExecutionInProgress(null)).toBeFalse();

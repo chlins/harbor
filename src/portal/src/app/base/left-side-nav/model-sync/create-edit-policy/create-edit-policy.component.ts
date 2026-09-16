@@ -44,6 +44,7 @@ const LIST_PAGE_SIZE = 100;
 })
 export class CreateEditModelSyncPolicyComponent {
     @Output() saved = new EventEmitter<void>();
+    @Output() goToRegistry = new EventEmitter<void>();
     @ViewChild(InlineAlertComponent, { static: true })
     inlineAlert: InlineAlertComponent;
 
@@ -165,6 +166,11 @@ export class CreateEditModelSyncPolicyComponent {
 
     confirmCancel(): void {
         this.close();
+    }
+
+    goRegistry(): void {
+        this.close();
+        this.goToRegistry.emit();
     }
 
     loadOptions(): void {

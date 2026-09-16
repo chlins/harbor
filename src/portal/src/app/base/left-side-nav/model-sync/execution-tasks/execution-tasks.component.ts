@@ -32,11 +32,11 @@ import {
     PAGE_SIZE_OPTIONS,
     REFRESH_TIME_DIFFERENCE,
 } from '../../../../shared/entities/shared.const';
-import {
-    isExecutionInProgress,
-    isTaskInProgress,
-    statusI18nKey,
-} from '../model-sync';
+import { isExecutionInProgress, isTaskInProgress } from '../model-sync';
+
+const STATUS_MAP = {
+    Succeed: 'Succeeded',
+};
 
 @Component({
     selector: 'model-sync-execution-tasks',
@@ -176,23 +176,11 @@ export class ModelSyncExecutionTasksComponent implements OnInit, OnDestroy {
         this.router.navigate(['harbor', 'model-sync']);
     }
 
-    statusKey(status: string): string {
-        return statusI18nKey(status);
-    }
-
-    triggerKey(trigger: string): string {
-        return trigger ? 'MODEL_SYNC.TRIGGER_' + trigger.toUpperCase() : '';
+    getStatusStr(status: string): string {
+        return STATUS_MAP[status] || status;
     }
 
     size(bytes: number): string {
         return formatSize(String(bytes || 0));
-    }
-
-    shortDigest(digest: string): string {
-        if (!digest) {
-            return '';
-        }
-        const idx = digest.indexOf(':');
-        return idx >= 0 ? digest.substring(idx + 1, idx + 13) : digest;
     }
 }
