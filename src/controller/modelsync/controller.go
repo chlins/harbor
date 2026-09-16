@@ -30,8 +30,7 @@ import (
 	"github.com/goharbor/harbor/src/lib/log"
 	"github.com/goharbor/harbor/src/lib/q"
 	"github.com/goharbor/harbor/src/pkg/modelsync/adapter"
-	// register the model adapters
-	_ "github.com/goharbor/harbor/src/pkg/modelsync/adapter/huggingface"
+	_ "github.com/goharbor/harbor/src/pkg/modelsync/adapter/huggingface" // register the model adapters
 	"github.com/goharbor/harbor/src/pkg/modelsync/filter"
 	modelsyncjob "github.com/goharbor/harbor/src/pkg/modelsync/job"
 	"github.com/goharbor/harbor/src/pkg/modelsync/packer"
