@@ -25,8 +25,7 @@ import (
 	"github.com/goharbor/harbor/src/lib/config"
 	"github.com/goharbor/harbor/src/lib/errors"
 	"github.com/goharbor/harbor/src/pkg/modelsync/adapter"
-	// register the model adapters
-	_ "github.com/goharbor/harbor/src/pkg/modelsync/adapter/huggingface"
+	_ "github.com/goharbor/harbor/src/pkg/modelsync/adapter/huggingface" // register the model adapters
 	"github.com/goharbor/harbor/src/pkg/modelsync/filter"
 	"github.com/goharbor/harbor/src/pkg/modelsync/packer"
 	regmodel "github.com/goharbor/harbor/src/pkg/reg/model"
