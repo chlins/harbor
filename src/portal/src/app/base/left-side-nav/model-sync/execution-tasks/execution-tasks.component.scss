@@ -1,0 +1,59 @@
+.execution-tasks {
+    .onback {
+        cursor: pointer;
+    }
+
+    .title-block {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-top: 8px;
+
+        h2 {
+            margin: 0;
+        }
+    }
+
+    .status {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .execution-detail {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 24px;
+        margin: 16px 0;
+
+        label {
+            color: #565656;
+            margin-right: 4px;
+        }
+    }
+
+    .refresh-btn {
+        cursor: pointer;
+        margin-left: 8px;
+
+        &:hover {
+            color: #007cbb;
+        }
+    }
+
+    .mono {
+        font-family: monospace;
+    }
+
+    .tag {
+        margin-right: 4px;
+    }
+
+    .color-green {
+        color: #318700;
+    }
+
+    .color-red {
+        color: #e12200;
+    }
+}
