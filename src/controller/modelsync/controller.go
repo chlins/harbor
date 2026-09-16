@@ -359,17 +359,17 @@ func (c *controller) Start(ctx context.Context, p *Policy, trigger string) (int6
 	if op := operator.FromContext(ctx); op != "" {
 		extra["operator"] = op
 	}
-	id, err := c.execMgr.Create(ctx, job.ModelSyncVendorType, p.ID, trigger, extra)
-	if err != nil {
-		return 0, err
-	}
-
-	// only one active sync per policy
+	// only one active sync per policy: count before creating the new execution
+	// so the record created below isn't counted as "running" itself
 	running, err := c.execMgr.Count(ctx, &q.Query{Keywords: map[string]any{
 		"VendorType": job.ModelSyncVendorType,
 		"VendorID":   p.ID,
 		"Status":     job.RunningStatus.String(),
 	}})
+	if err != nil {
+		return 0, err
+	}
+	id, err := c.execMgr.Create(ctx, job.ModelSyncVendorType, p.ID, trigger, extra)
 	if err != nil {
 		return 0, err
 	}
