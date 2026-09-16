@@ -42,6 +42,8 @@ const FAKE_PASSWORD = 'rjGcfuRu';
 const FAKE_JSON_KEY = 'No Change';
 const METADATA_URL = CURRENT_BASE_HREF + '/replication/adapterinfos';
 const FIXED_PATTERN_TYPE: string = 'EndpointPatternTypeFix';
+const FIXED_ACCESS_KEY_TYPE: string = 'AccessKeyTypeFix';
+const FILE_ACCESS_SECRET_TYPE: string = 'AccessSecretTypeFile';
 @Component({
     selector: 'hbr-create-edit-endpoint',
     templateUrl: './create-edit-endpoint.component.html',
@@ -122,6 +124,25 @@ export class CreateEditEndpointComponent
             this.target.type &&
             this.adapterInfo[this.target.type] &&
             this.adapterInfo[this.target.type].credential_pattern
+        );
+    }
+
+    // the access key is fixed by the adapter (e.g. "token" for Hugging Face,
+    // "_json_key" for Google GCR) and shouldn't be edited by the user
+    isFixedAccessKey(): boolean {
+        return (
+            !this.isNormalCredential() &&
+            this.adapterInfo[this.target.type].credential_pattern
+                .access_key_type === FIXED_ACCESS_KEY_TYPE
+        );
+    }
+
+    // the access secret is a file content (e.g. the GCR json key) and needs a textarea
+    isFileAccessSecret(): boolean {
+        return (
+            !this.isNormalCredential() &&
+            this.adapterInfo[this.target.type].credential_pattern
+                .access_secret_type === FILE_ACCESS_SECRET_TYPE
         );
     }
     selectedEndpoint(endpoint: string) {

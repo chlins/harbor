@@ -157,7 +157,7 @@
                     placeholder="Access ID"
                     id="destination_access_key"
                     [disabled]="testOngoing"
-                    [readonly]="target.type === 'google-gcr' || !editable"
+                    [readonly]="isFixedAccessKey() || !editable"
                     [(ngModel)]="target.credential.access_key"
                     size="30"
                     name="access_key"
@@ -170,7 +170,7 @@
                 }}</label>
                 <div class="clr-control-container">
                     <div class="clr-textarea-wrapper mt-0">
-                        @if (isNormalCredential()) {
+                        @if (!isFileAccessSecret()) {
                         <input
                             autocomplete="off"
                             class="clr-input"
