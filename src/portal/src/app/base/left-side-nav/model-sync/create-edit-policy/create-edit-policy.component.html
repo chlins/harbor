@@ -1,0 +1,453 @@
+<clr-modal
+    [(clrModalOpen)]="opened"
+    [clrModalStaticBackdrop]="true"
+    [clrModalClosable]="false"
+    [clrModalSize]="'xl'">
+    <h3 class="modal-title">
+        {{
+            (isEdit ? 'MODEL_SYNC.EDIT_POLICY' : 'MODEL_SYNC.NEW_POLICY')
+                | translate
+        }}
+    </h3>
+    <div class="modal-body">
+        <inline-alert (confirmEvt)="confirmCancel()"></inline-alert>
+        <form [formGroup]="form" class="clr-form clr-form-horizontal">
+            <!-- name -->
+            <div class="clr-form-control">
+                <label for="ms_name" class="clr-control-label required">{{
+                    'MODEL_SYNC.NAME' | translate
+                }}</label>
+                <div
+                    class="clr-control-container"
+                    [class.clr-error]="fieldInvalid('name')">
+                    <div class="clr-input-wrapper">
+                        <input
+                            clrInput
+                            type="text"
+                            id="ms_name"
+                            class="clr-input wide"
+                            formControlName="name"
+                            autocomplete="off" />
+                    </div>
+                    @if (fieldInvalid('name')) {
+                    <clr-control-error>{{
+                        'MODEL_SYNC.NAME_REQUIRED' | translate
+                    }}</clr-control-error>
+                    }
+                </div>
+            </div>
+            <!-- description -->
+            <div class="clr-form-control">
+                <label for="ms_description" class="clr-control-label">{{
+                    'MODEL_SYNC.DESCRIPTION' | translate
+                }}</label>
+                <div class="clr-control-container">
+                    <div class="clr-textarea-wrapper">
+                        <textarea
+                            clrTextarea
+                            id="ms_description"
+                            class="clr-textarea wide"
+                            rows="2"
+                            formControlName="description"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <h5 class="section-title">{{ 'MODEL_SYNC.SOURCE' | translate }}</h5>
+            <!-- registry -->
+            <div class="clr-form-control">
+                <label for="ms_registry" class="clr-control-label required">{{
+                    'MODEL_SYNC.SOURCE_REGISTRY' | translate
+                }}</label>
+                <div
+                    class="clr-control-container"
+                    [class.clr-error]="fieldInvalid('registry_id')">
+                    <div class="clr-select-wrapper">
+                        <select
+                            clrSelect
+                            id="ms_registry"
+                            class="clr-select wide"
+                            formControlName="registry_id">
+                            <option [ngValue]="null" disabled>
+                                {{ 'MODEL_SYNC.SELECT_REGISTRY' | translate }}
+                            </option>
+                            @for (r of registries; track r.id) {
+                            <option [ngValue]="r.id">
+                                {{ r.name }} ({{ r.type }}, {{ r.url }})
+                            </option>
+                            }
+                        </select>
+                    </div>
+                    @if (!loadingOptions && registries.length === 0) {
+                    <clr-control-helper>{{
+                        'MODEL_SYNC.NO_REGISTRY_HINT' | translate
+                    }}</clr-control-helper>
+                    }
+                </div>
+            </div>
+            <!-- src repository -->
+            <div class="clr-form-control">
+                <label for="ms_src_repo" class="clr-control-label required">{{
+                    'MODEL_SYNC.MODEL' | translate
+                }}</label>
+                <div
+                    class="clr-control-container"
+                    [class.clr-error]="fieldInvalid('src_repository')">
+                    <div class="clr-input-wrapper">
+                        <input
+                            clrInput
+                            type="text"
+                            id="ms_src_repo"
+                            class="clr-input wide"
+                            placeholder="Qwen/Qwen3-8B"
+                            formControlName="src_repository"
+                            autocomplete="off" />
+                    </div>
+                    @if (fieldInvalid('src_repository')) {
+                    <clr-control-error>{{
+                        'MODEL_SYNC.MODEL_INVALID' | translate
+                    }}</clr-control-error>
+                    } @else {
+                    <clr-control-helper>{{
+                        'MODEL_SYNC.MODEL_HINT' | translate
+                    }}</clr-control-helper>
+                    }
+                </div>
+            </div>
+            <!-- src revision -->
+            <div class="clr-form-control">
+                <label for="ms_src_rev" class="clr-control-label">{{
+                    'MODEL_SYNC.REVISION' | translate
+                }}</label>
+                <div class="clr-control-container">
+                    <div class="clr-input-wrapper">
+                        <input
+                            clrInput
+                            type="text"
+                            id="ms_src_rev"
+                            class="clr-input wide"
+                            placeholder="main"
+                            formControlName="src_revision"
+                            autocomplete="off" />
+                    </div>
+                    <clr-control-helper>{{
+                        'MODEL_SYNC.REVISION_HINT' | translate
+                    }}</clr-control-helper>
+                </div>
+            </div>
+            <!-- file filters -->
+            <div class="clr-form-control">
+                <label for="ms_filters" class="clr-control-label">{{
+                    'MODEL_SYNC.FILE_FILTERS' | translate
+                }}</label>
+                <div class="clr-control-container">
+                    <div class="clr-textarea-wrapper">
+                        <textarea
+                            clrTextarea
+                            id="ms_filters"
+                            class="clr-textarea wide mono"
+                            rows="3"
+                            placeholder="*.safetensors&#10;*.json&#10;README.md"
+                            formControlName="file_filters"></textarea>
+                    </div>
+                    <clr-control-helper>{{
+                        'MODEL_SYNC.FILE_FILTERS_HINT' | translate
+                    }}</clr-control-helper>
+                </div>
+            </div>
+            <!-- preview -->
+            <div class="clr-form-control">
+                <label class="clr-control-label">{{
+                    'MODEL_SYNC.PREVIEW' | translate
+                }}</label>
+                <div class="clr-control-container preview-container">
+                    <button
+                        type="button"
+                        class="btn btn-sm btn-outline"
+                        [disabled]="!canPreview()"
+                        (click)="doPreview()">
+                        @if (previewing) {
+                        <span class="spinner spinner-inline"></span>
+                        }
+                        {{ 'MODEL_SYNC.RESOLVE_SOURCE' | translate }}
+                    </button>
+                    @if (previewError) {
+                    <div class="alert alert-danger alert-sm preview-alert">
+                        <div class="alert-items">
+                            <div class="alert-item static">
+                                <span class="alert-text">{{
+                                    previewError | translate
+                                }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    } @if (preview) {
+                    <div class="preview">
+                        <div class="preview-summary">
+                            <div>
+                                <label
+                                    >{{
+                                        'MODEL_SYNC.RESOLVED_REVISION'
+                                            | translate
+                                    }}:</label
+                                >
+                                <a
+                                    [href]="preview.source_url"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="mono"
+                                    >{{ preview.revision }}</a
+                                >
+                            </div>
+                            <div>
+                                <label
+                                    >{{ 'MODEL_SYNC.TAGS' | translate }}:</label
+                                >
+                                @for (t of preview.tags; track t) {
+                                <span class="label mono">{{ t }}</span>
+                                }
+                            </div>
+                            @if (preview.metadata?.license) {
+                            <div>
+                                <label
+                                    >{{
+                                        'MODEL_SYNC.LICENSE' | translate
+                                    }}:</label
+                                >
+                                <span>{{ preview.metadata.license }}</span>
+                            </div>
+                            } @if (preview.metadata?.pipeline_tag) {
+                            <div>
+                                <label
+                                    >{{
+                                        'MODEL_SYNC.PIPELINE' | translate
+                                    }}:</label
+                                >
+                                <span>{{ preview.metadata.pipeline_tag }}</span>
+                            </div>
+                            }
+                            <div>
+                                <label
+                                    >{{
+                                        'MODEL_SYNC.FILES' | translate
+                                    }}:</label
+                                >
+                                <span>
+                                    {{
+                                        'MODEL_SYNC.MATCHED_OF_TOTAL'
+                                            | translate
+                                                : {
+                                                      matched:
+                                                          preview.matched_files,
+                                                      matchedSize: size(
+                                                          preview.matched_size
+                                                      ),
+                                                      total: preview.total_files,
+                                                      totalSize: size(
+                                                          preview.total_size
+                                                      )
+                                                  }
+                                    }}
+                                </span>
+                                <a
+                                    href="javascript:void(0)"
+                                    class="toggle-files"
+                                    (click)="showAllFiles = !showAllFiles">
+                                    {{
+                                        (showAllFiles
+                                            ? 'MODEL_SYNC.SHOW_MATCHED'
+                                            : 'MODEL_SYNC.SHOW_ALL'
+                                        ) | translate
+                                    }}
+                                </a>
+                            </div>
+                        </div>
+                        <div class="preview-files">
+                            <table class="table table-compact table-noborder">
+                                <thead>
+                                    <tr>
+                                        <th class="left">
+                                            {{ 'MODEL_SYNC.FILE' | translate }}
+                                        </th>
+                                        <th class="left">
+                                            {{ 'MODEL_SYNC.TYPE' | translate }}
+                                        </th>
+                                        <th class="left">
+                                            {{ 'MODEL_SYNC.SIZE' | translate }}
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (f of displayedFiles; track f.path) {
+                                    <tr [class.unmatched]="!f.matched">
+                                        <td class="left mono">{{ f.path }}</td>
+                                        <td class="left">{{ f.type }}</td>
+                                        <td class="left">{{ size(f.size) }}</td>
+                                    </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    }
+                </div>
+            </div>
+
+            <h5 class="section-title">
+                {{ 'MODEL_SYNC.DESTINATION' | translate }}
+            </h5>
+            <!-- dest project -->
+            <div class="clr-form-control">
+                <label for="ms_project" class="clr-control-label required">{{
+                    'MODEL_SYNC.DEST_PROJECT' | translate
+                }}</label>
+                <div
+                    class="clr-control-container"
+                    [class.clr-error]="fieldInvalid('dest_project_id')">
+                    <div class="clr-select-wrapper">
+                        <select
+                            clrSelect
+                            id="ms_project"
+                            class="clr-select wide"
+                            formControlName="dest_project_id">
+                            <option [ngValue]="null" disabled>
+                                {{ 'MODEL_SYNC.SELECT_PROJECT' | translate }}
+                            </option>
+                            @for (p of projects; track p.project_id) {
+                            <option [ngValue]="p.project_id">
+                                {{ p.name }}
+                            </option>
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <!-- dest repository -->
+            <div class="clr-form-control">
+                <label for="ms_dest_repo" class="clr-control-label">{{
+                    'MODEL_SYNC.DEST_REPOSITORY' | translate
+                }}</label>
+                <div class="clr-control-container">
+                    <div class="clr-input-wrapper">
+                        <input
+                            clrInput
+                            type="text"
+                            id="ms_dest_repo"
+                            class="clr-input wide"
+                            [placeholder]="defaultDestRepository"
+                            formControlName="dest_repository"
+                            autocomplete="off" />
+                    </div>
+                    <clr-control-helper>
+                        {{ 'MODEL_SYNC.DEST_REPOSITORY_HINT' | translate }}
+                        @if (destinationPreview) {
+                        <span class="mono">{{ destinationPreview }}</span>
+                        }
+                    </clr-control-helper>
+                </div>
+            </div>
+
+            <h5 class="section-title">
+                {{ 'MODEL_SYNC.TRIGGER' | translate }}
+            </h5>
+            <!-- trigger -->
+            <div class="clr-form-control">
+                <label for="ms_trigger" class="clr-control-label required">{{
+                    'MODEL_SYNC.TRIGGER_MODE' | translate
+                }}</label>
+                <div class="clr-control-container">
+                    <div class="clr-select-wrapper">
+                        <select
+                            clrSelect
+                            id="ms_trigger"
+                            class="clr-select"
+                            formControlName="trigger_type">
+                            @for (t of triggerTypes; track t) {
+                            <option [value]="t">
+                                {{
+                                    'MODEL_SYNC.TRIGGER_' + t.toUpperCase()
+                                        | translate
+                                }}
+                            </option>
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+            @if (isScheduled) {
+            <div class="clr-form-control">
+                <label for="ms_cron" class="clr-control-label required">{{
+                    'MODEL_SYNC.CRON' | translate
+                }}</label>
+                <div
+                    class="clr-control-container"
+                    [class.clr-error]="cronShouldShowError()">
+                    <div class="clr-input-wrapper">
+                        <input
+                            clrInput
+                            type="text"
+                            id="ms_cron"
+                            class="clr-input mono"
+                            placeholder="0 0 2 * * *"
+                            formControlName="cron"
+                            autocomplete="off" />
+                        <clr-tooltip class="des-tooltip">
+                            <clr-icon
+                                clrTooltipTrigger
+                                shape="info-circle"
+                                size="24"></clr-icon>
+                            <clr-tooltip-content
+                                class="flatten"
+                                clrPosition="top-left"
+                                clrSize="lg"
+                                *clrIfOpen>
+                                <cron-tooltip></cron-tooltip>
+                            </clr-tooltip-content>
+                        </clr-tooltip>
+                    </div>
+                    @if (cronShouldShowError()) {
+                    <clr-control-error>{{
+                        'MODEL_SYNC.CRON_ERROR' | translate
+                    }}</clr-control-error>
+                    }
+                </div>
+            </div>
+            }
+            <!-- enabled -->
+            <div class="clr-form-control">
+                <label class="clr-control-label">{{
+                    'MODEL_SYNC.ENABLED' | translate
+                }}</label>
+                <div class="clr-control-container">
+                    <clr-toggle-wrapper>
+                        <input
+                            type="checkbox"
+                            clrToggle
+                            id="ms_enabled"
+                            formControlName="enabled" />
+                    </clr-toggle-wrapper>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button
+            type="button"
+            class="btn btn-outline"
+            [disabled]="saving"
+            (click)="onCancel()">
+            {{ 'BUTTON.CANCEL' | translate }}
+        </button>
+        <button
+            type="button"
+            id="ms_save"
+            class="btn btn-primary"
+            [disabled]="!canSave()"
+            (click)="onSave()">
+            @if (saving) {
+            <span class="spinner spinner-inline"></span>
+            }
+            {{ 'BUTTON.SAVE' | translate }}
+        </button>
+    </div>
+</clr-modal>
