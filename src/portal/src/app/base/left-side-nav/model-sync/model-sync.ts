@@ -20,18 +20,6 @@ export const MODEL_SYNC_PENDING = 'Pending';
 export const TRIGGER_MANUAL = 'manual';
 export const TRIGGER_SCHEDULED = 'scheduled';
 
-export const MODEL_SYNC_STATUS_I18N = {
-    InProgress: 'MODEL_SYNC.IN_PROGRESS',
-    Succeed: 'MODEL_SYNC.SUCCEEDED',
-    Failed: 'MODEL_SYNC.FAILED',
-    Stopped: 'MODEL_SYNC.STOPPED',
-    Pending: 'MODEL_SYNC.PENDING',
-};
-
-export function statusI18nKey(status: string): string {
-    return MODEL_SYNC_STATUS_I18N[status] || status;
-}
-
 export function isExecutionInProgress(execution: ModelSyncExecution): boolean {
     return !!execution && execution.status === MODEL_SYNC_IN_PROGRESS;
 }

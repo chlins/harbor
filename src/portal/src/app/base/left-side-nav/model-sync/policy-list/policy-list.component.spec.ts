@@ -114,10 +114,20 @@ describe('ModelSyncPolicyListComponent', () => {
         expect(component.destination(policy)).toEqual('library/qwen/qwen3-8b');
         expect(component.revision(policy)).toEqual('main');
         expect(component.isScheduled(policy)).toBeTrue();
-        expect(component.triggerLabel(policy)).toEqual('0 0 * * * *');
-        expect(component.triggerKey('manual')).toEqual(
-            'MODEL_SYNC.TRIGGER_MANUAL'
+        expect(component.triggerI18n(policy)).toEqual('REPLICATION.SCHEDULED');
+        expect(component.truncatedDescription('a'.repeat(40)).length).toEqual(
+            35
         );
+        expect(component.getStatusStr('Succeed', '')).toEqual('Succeeded');
+        expect(
+            component.getStatusStr('Failed', 'Execution skipped: busy')
+        ).toEqual('Skipped');
+        expect(
+            component.getDuration({
+                start_time: '2026-01-01T00:00:00Z',
+                end_time: '2026-01-01T00:01:05Z',
+            })
+        ).toEqual('1m5s');
     });
 
     it('should load executions when a policy is selected', fakeAsync(() => {

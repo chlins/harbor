@@ -108,13 +108,12 @@ describe('ModelSyncExecutionTasksComponent', () => {
     }));
 
     it('should format helpers', () => {
-        expect(component.shortDigest(task.digest)).toEqual('abcdef123456');
-        expect(component.shortDigest('')).toEqual('');
         expect(component.size(2048)).toEqual('2.00KiB');
         expect(component.viewLog(11)).toContain(
             '/model-sync/executions/10/tasks/11/log'
         );
-        expect(component.statusKey('Failed')).toEqual('MODEL_SYNC.FAILED');
+        expect(component.getStatusStr('Succeed')).toEqual('Succeeded');
+        expect(component.getStatusStr('Failed')).toEqual('Failed');
     });
 
     it('should stop the execution', fakeAsync(() => {

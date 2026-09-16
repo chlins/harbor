@@ -1,74 +1,118 @@
-.section-title {
-    margin: 20px 0 4px;
-    padding-bottom: 4px;
-    border-bottom: 1px solid #ddd;
-    font-weight: 500;
+.alert-label {
+    color: red;
+    font-size: 12px;
 }
 
-.wide {
-    width: 420px;
+.go-link {
+    line-height: 1rem;
+    cursor: pointer;
+}
+
+.modal-body-height {
+    max-height: 85vh;
+}
+
+.filterSelect {
+    position: relative;
+    width: 315px;
+    margin-bottom: 0.25rem;
+}
+
+.space-between {
+    display: flex;
+    justify-content: space-between;
+}
+
+.flex {
+    display: flex;
+}
+
+.sub-label {
+    flex: 0 0 5rem;
+}
+
+.clr-control-label {
+    width: 8.6rem;
+}
+
+.des-tooltip {
+    margin-left: 0.5rem;
+}
+
+.width-input {
+    width: 17rem;
+}
+
+.width-name-resource {
+    flex: 0 0 12rem;
+    width: 12rem;
+}
+
+.margin-left-90px {
+    margin-left: 5rem;
+}
+
+.spinner-position {
+    margin-left: 0.5rem;
+}
+
+.display-none {
+    display: none;
+}
+
+.no-extend {
+    flex: 1;
+}
+
+.cron-input {
+    width: 12rem;
 }
 
 .mono {
     font-family: monospace;
 }
 
-.modal-body {
-    max-height: 70vh;
-    overflow-y: auto;
-}
-
-.preview-container {
-    max-width: 640px;
-}
-
-.preview-alert {
-    margin-top: 8px;
-}
-
 .preview {
-    margin-top: 8px;
-    border: 1px solid #ddd;
-    border-radius: 3px;
-    padding: 8px 12px;
+    margin-top: 0.25rem;
     font-size: 0.55rem;
+    max-width: 22rem;
 
-    .preview-summary {
-        div {
-            margin-bottom: 4px;
-        }
+    .preview-label {
+        display: inline-block;
+        min-width: 5rem;
+        color: #565656;
+    }
 
-        label {
-            display: inline-block;
-            min-width: 110px;
-            color: #565656;
-        }
+    .label {
+        margin-left: 0.25rem;
+    }
 
-        .label {
-            margin-right: 4px;
-        }
-
-        .toggle-files {
-            margin-left: 12px;
-        }
+    .toggle-files {
+        margin-left: 0.5rem;
     }
 
     .preview-files {
-        max-height: 220px;
+        max-height: 8rem;
         overflow-y: auto;
-        margin-top: 8px;
+        margin-top: 0.25rem;
+        border: 1px solid #ddd;
+        border-radius: 3px;
+        padding: 0.2rem 0.4rem;
+    }
 
-        table {
-            margin-top: 0;
-        }
+    .preview-file {
+        display: flex;
+        justify-content: space-between;
+        gap: 0.5rem;
 
-        .unmatched {
+        .file-meta {
             color: #8c8c8c;
-            text-decoration: line-through;
+            white-space: nowrap;
         }
     }
-}
 
-.des-tooltip {
-    margin-left: 6px;
+    .unmatched {
+        color: #8c8c8c;
+        text-decoration: line-through;
+    }
 }
