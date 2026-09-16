@@ -170,10 +170,10 @@
             <clr-dg-row>
                 <clr-dg-cell>{{ t.id }}</clr-dg-cell>
                 <clr-dg-cell>
-                    {{ t.src_repository }}@if (t.src_revision) {<span
-                        class="mono"
-                        >@{{ t.src_revision }}</span
-                    >}
+                    {{ t.src_repository }}
+                    @if (t.src_revision) {
+                    <span class="mono">:{{ t.src_revision }}</span>
+                    }
                 </clr-dg-cell>
                 <clr-dg-cell>{{ t.dest_repository }}</clr-dg-cell>
                 <clr-dg-cell>
