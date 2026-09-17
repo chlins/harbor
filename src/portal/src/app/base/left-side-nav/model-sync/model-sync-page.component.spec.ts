@@ -50,7 +50,7 @@ describe('model sync helpers', () => {
             '*.json',
             'README.md',
         ]);
-        expect(formatFileFilters(['a', 'b'])).toEqual('a\nb');
+        expect(formatFileFilters(['a', 'b'])).toEqual('a, b');
         expect(formatFileFilters(null)).toEqual('');
     });
 

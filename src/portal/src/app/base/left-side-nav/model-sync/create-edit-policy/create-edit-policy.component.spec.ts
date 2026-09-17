@@ -125,7 +125,7 @@ describe('CreateEditModelSyncPolicyComponent', () => {
             name: 'qwen',
             registry_id: 2,
             src_repository: 'Qwen/Qwen3-8B',
-            file_filters: '*.safetensors\n*.json',
+            file_filters: '*.safetensors, *.json',
             dest_project_id: 1,
             trigger_type: 'scheduled',
             cron: '0 0 * * * *',

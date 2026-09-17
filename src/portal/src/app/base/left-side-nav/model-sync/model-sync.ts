@@ -44,5 +44,5 @@ export function parseFileFilters(input: string): string[] {
 }
 
 export function formatFileFilters(filters: string[]): string {
-    return (filters || []).join('\n');
+    return (filters || []).join(', ');
 }
