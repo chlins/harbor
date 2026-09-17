@@ -12,32 +12,6 @@
     margin-bottom: 11px;
 }
 
-.execution-select {
-    padding-right: 50px;
-    height: 24px;
-    display: flex;
-    justify-content: flex-end;
-    padding-top: 25px;
-
-    .filter-tag {
-        float: left;
-        margin-top: 8px;
-
-        .clr-form-control {
-            margin-top: 0;
-        }
-    }
-
-    .refresh-btn {
-        cursor: pointer;
-        margin-top: 7px;
-
-        &:hover {
-            color: #007cbb;
-        }
-    }
-}
-
 /* stylelint-disable */
 .rightPos {
     position: absolute;
@@ -47,11 +21,6 @@
     height: 32px;
 }
 
-.fiter-task {
-    margin-left: 0.4rem;
-    margin-top: 0.05rem;
-}
-
 .model-sync-row {
     position: relative;
 }
@@ -59,12 +28,28 @@
 .jobList {
     padding-left: 0;
 
-    .jobsRow {
-        height: 60px;
+    .executions-header {
         display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-top: 24px;
+        padding-right: 16px;
 
-        .option-left-down {
-            margin-top: 36px;
+        .executions-title {
+            margin: 0;
+        }
+
+        .executions-tools {
+            display: flex;
+            align-items: center;
+
+            .filter-tag .clr-form-control {
+                margin-top: 0;
+            }
+
+            .refresh-btn {
+                margin-left: 8px;
+            }
         }
     }
 }
