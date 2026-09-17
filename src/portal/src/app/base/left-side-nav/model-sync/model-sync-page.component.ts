@@ -16,6 +16,7 @@ import { Component } from '@angular/core';
 @Component({
     selector: 'model-sync-page',
     templateUrl: './model-sync-page.component.html',
+    styleUrls: ['./model-sync-page.component.scss'],
     standalone: false,
 })
 export class ModelSyncPageComponent {}
