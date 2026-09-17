@@ -260,45 +260,38 @@
         class="col-lg-12 col-md-12 col-sm-12 col-xs-12 jobList"
         [hidden]="!selectedPolicy">
         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <div class="row flex-items-xs-between jobsRow">
-                <h5 class="flex-items-xs-bottom option-left-down">
+            <div class="executions-header">
+                <h5 class="executions-title">
                     {{ 'MODEL_SYNC.EXECUTIONS' | translate }}
                 </h5>
-                <div
-                    class="row flex-items-xs-between flex-items-xs-bottom fiter-task">
-                    <div class="execution-select">
-                        <div
-                            class="select filter-tag"
-                            [hidden]="!isOpenFilterTag">
-                            <clr-select-container>
-                                <select
-                                    clrSelect
-                                    (change)="doFilterExecutions($event)">
-                                    <option value="trigger">
-                                        {{ 'MODEL_SYNC.TRIGGER' | translate }}
-                                    </option>
-                                    <option value="status">
-                                        {{ 'MODEL_SYNC.STATUS' | translate }}
-                                    </option>
-                                </select>
-                            </clr-select-container>
-                        </div>
-                        <hbr-filter
-                            id="filter-model-sync-executions"
-                            [withDivider]="true"
-                            (openFlag)="openFilter($event)"
-                            filterPlaceholder="{{
-                                'REPLICATION.FILTER_EXECUTIONS_PLACEHOLDER'
-                                    | translate
-                            }}"
-                            (filterEvt)="doSearchExecutions($event)"
-                            [currentValue]="currentTerm"></hbr-filter>
-                        <span class="refresh-btn">
-                            <clr-icon
-                                shape="refresh"
-                                (click)="refreshExecutions()"></clr-icon>
-                        </span>
+                <div class="executions-tools">
+                    <div class="select filter-tag" [hidden]="!isOpenFilterTag">
+                        <clr-select-container>
+                            <select
+                                clrSelect
+                                (change)="doFilterExecutions($event)">
+                                <option value="trigger">
+                                    {{ 'MODEL_SYNC.TRIGGER' | translate }}
+                                </option>
+                                <option value="status">
+                                    {{ 'MODEL_SYNC.STATUS' | translate }}
+                                </option>
+                            </select>
+                        </clr-select-container>
                     </div>
+                    <hbr-filter
+                        id="filter-model-sync-executions"
+                        [withDivider]="true"
+                        (openFlag)="openFilter($event)"
+                        filterPlaceholder="{{
+                            'REPLICATION.FILTER_EXECUTIONS_PLACEHOLDER'
+                                | translate
+                        }}"
+                        (filterEvt)="doSearchExecutions($event)"
+                        [currentValue]="currentTerm"></hbr-filter>
+                    <span class="refresh-btn" (click)="refreshExecutions()">
+                        <clr-icon shape="refresh"></clr-icon>
+                    </span>
                 </div>
             </div>
         </div>
