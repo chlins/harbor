@@ -19,6 +19,41 @@ import { ErrorHandler } from '../../../../../../shared/units/error-handler';
 import { FilesItem } from 'src/app/shared/services/interface';
 import { formatSize } from 'src/app/shared/units/utils';
 
+// Clarity icon shown for a file, chosen by its class (weights, configs, docs,
+// code, ...) so the file list of a model is easier to scan.
+const ICON_RULES: { icon: string; test: RegExp }[] = [
+    {
+        icon: 'certificate',
+        test: /^(license|licence|notice|copying)(\.[a-z0-9]+)?$/i,
+    },
+    { icon: 'note', test: /^readme|\.(md|markdown|rst|txt|pdf|adoc)$/i },
+    {
+        icon: 'layers',
+        test: /\.(safetensors|bin|gguf|ggml|pt|pth|ckpt|onnx|h5|hdf5|pb|tflite|msgpack|npy|npz|pkl|mlmodel|engine)(\.[0-9]+)?$/i,
+    },
+    {
+        icon: 'cog',
+        test: /^(config|generation_config|tokenizer|tokenizer_config|special_tokens_map|vocab|merges|params|chat_template)|\.(json|jsonl|yaml|yml|toml|ini|cfg|model|tiktoken|jinja)$/i,
+    },
+    {
+        icon: 'code',
+        test: /\.(py|ipynb|sh|js|ts|go|rs|c|cpp|h|java|cu|lua|rb)$/i,
+    },
+    { icon: 'table', test: /\.(csv|tsv|parquet|arrow|feather)$/i },
+    { icon: 'file-zip', test: /\.(zip|tar|gz|tgz|bz2|xz|7z|zst)$/i },
+    { icon: 'image', test: /\.(png|jpe?g|gif|svg|webp|bmp)$/i },
+];
+
+export function fileIcon(name: string): string {
+    const base = (name || '').split('/').pop() || '';
+    for (const rule of ICON_RULES) {
+        if (rule.test.test(base)) {
+            return rule.icon;
+        }
+    }
+    return 'file';
+}
+
 @Component({
     selector: 'hbr-artifact-files',
     templateUrl: './files.component.html',
@@ -55,6 +90,13 @@ export class ArtifactFilesComponent implements OnInit {
                     }
                 );
         }
+    }
+
+    iconFor(file: FilesItem & { expanded?: boolean }): string {
+        if (file.children) {
+            return file.expanded ? 'folder-open' : 'folder';
+        }
+        return fileIcon(file.name);
     }
 
     getChildren(folder: any) {

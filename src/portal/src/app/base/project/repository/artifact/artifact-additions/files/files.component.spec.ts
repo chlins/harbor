@@ -15,7 +15,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { AdditionsService } from '../additions.service';
 import { of } from 'rxjs';
-import { ArtifactFilesComponent } from './files.component';
+import { ArtifactFilesComponent, fileIcon } from './files.component';
 import { AdditionLink } from '../../../../../../../../ng-swagger-gen/models/addition-link';
 import { ErrorHandler } from '../../../../../../shared/units/error-handler';
 import { SharedTestingModule } from '../../../../../../shared/shared.module';
@@ -124,5 +124,21 @@ describe('FilesComponent', () => {
         await fixture.whenStable();
         fixture.detectChanges();
         expect(component.filesList?.length).toEqual(filesList.length);
+    });
+
+    it('should pick an icon by file name', () => {
+        expect(fileIcon('LICENSE')).toEqual('certificate');
+        expect(fileIcon('README.md')).toEqual('note');
+        expect(fileIcon('model-00001-of-00002.safetensors')).toEqual('layers');
+        expect(fileIcon('Qwen3-0.6B-Q8_0.gguf')).toEqual('layers');
+        expect(fileIcon('config.json')).toEqual('cog');
+        expect(fileIcon('tokenizer.model')).toEqual('cog');
+        expect(fileIcon('params')).toEqual('cog');
+        expect(fileIcon('modeling_qwen.py')).toEqual('code');
+        expect(fileIcon('data.parquet')).toEqual('table');
+        expect(fileIcon('weights.tar.gz')).toEqual('file-zip');
+        expect(fileIcon('banner.png')).toEqual('image');
+        expect(fileIcon('unknown.xyz')).toEqual('file');
+        expect(fileIcon('')).toEqual('file');
     });
 });
