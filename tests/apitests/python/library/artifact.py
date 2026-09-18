@@ -73,15 +73,21 @@ class Artifact(base.Base, object):
     def get_addition(self, project_name, repo_name, reference, addition, **kwargs):
         return self._get_client(**kwargs).get_addition_with_http_info(project_name, repo_name, reference, addition)
 
+    def get_addition_raw(self, project_name, repo_name, reference, addition, **kwargs):
+        """Returns the addition body as a string without swagger deserialization."""
+        resp = self._get_client(**kwargs).get_addition_with_http_info(project_name, repo_name, reference, addition, _preload_content=False)
+        base._assert_status_code(200, resp.status)
+        return resp.data.decode("utf-8")
+
     def get_vulnerabilities_addition(self, project_name, repo_name, reference, x_accept_vulnerabilities=None, **kwargs):
         """Returns the body of the vulnerabilities addition (the vulnerability report of an image or the
         model security report of an AI model, depending on the accepted mime types) as a string."""
-        params = {}
+        params = {"_preload_content": False}
         if x_accept_vulnerabilities:
             params["x_accept_vulnerabilities"] = x_accept_vulnerabilities
-        data, status_code, _ = self._get_client(**kwargs).get_vulnerabilities_addition_with_http_info(project_name, repo_name, reference, **params)
-        base._assert_status_code(200, status_code)
-        return data
+        resp = self._get_client(**kwargs).get_vulnerabilities_addition_with_http_info(project_name, repo_name, reference, **params)
+        base._assert_status_code(200, resp.status)
+        return resp.data.decode("utf-8")
 
     def add_label_to_reference(self, project_name, repo_name, reference, label_id, expect_status_code = 200, **kwargs):
         label = v2_swagger_client.Label(id = label_id)
