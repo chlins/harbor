@@ -51,7 +51,7 @@ func parseScanReportMimeTypes(header *string) []string {
 		for mimeType := range strings.SplitSeq(*header, ",") {
 			mimeType = strings.TrimSpace(mimeType)
 			switch mimeType {
-			case v1.MimeTypeNativeReport, v1.MimeTypeGenericVulnerabilityReport:
+			case v1.MimeTypeNativeReport, v1.MimeTypeGenericVulnerabilityReport, v1.MimeTypeModelSecurityReport:
 				mimeTypes = append(mimeTypes, mimeType)
 			}
 		}

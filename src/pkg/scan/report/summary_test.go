@@ -23,6 +23,7 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"github.com/goharbor/harbor/src/pkg/scan/dao/scan"
+	modelsecurity "github.com/goharbor/harbor/src/pkg/scan/modelsecurity/model"
 	v1 "github.com/goharbor/harbor/src/pkg/scan/rest/v1"
 	"github.com/goharbor/harbor/src/pkg/scan/vuln"
 )
@@ -112,4 +113,57 @@ func (suite *SummaryTestSuite) TestSummaryGenerateSummaryWrongMime() {
 
 	_, err := GenerateSummary(suite.r)
 	require.Error(suite.T(), err)
+}
+
+// TestSummaryGenerateModelSecuritySummary ...
+func (suite *SummaryTestSuite) TestSummaryGenerateModelSecuritySummary() {
+	rp := &modelsecurity.Report{
+		GeneratedAt: time.Now().UTC().String(),
+		Scanner:     &v1.Scanner{Name: "ModelAudit", Vendor: "Promptfoo", Version: "0.2.52"},
+		Severity:    vuln.Critical,
+		Summary:     &modelsecurity.Summary{Total: 1, Critical: 1, FilesScanned: 3, BytesScanned: 42},
+		Findings:    []*modelsecurity.Finding{{ID: "S201", Severity: vuln.Critical, Message: "posix.system", File: "model.pkl"}},
+	}
+	jsonData, err := json.Marshal(rp)
+	require.NoError(suite.T(), err)
+
+	r := &scan.Report{
+		UUID:      "r-uuid-002",
+		MimeType:  v1.MimeTypeModelSecurityReport,
+		Status:    "Success",
+		Report:    string(jsonData),
+		StartTime: time.Now().Add(-10 * time.Second),
+		EndTime:   time.Now(),
+	}
+
+	summary, err := GenerateSummary(r)
+	require.NoError(suite.T(), err)
+	ms, ok := summary.(*modelsecurity.ReportSummary)
+	require.True(suite.T(), ok)
+	suite.Equal("r-uuid-002", ms.ReportID)
+	suite.Equal(vuln.Critical, ms.Severity)
+	suite.Equal(100, ms.CompletePercent)
+	suite.Equal("ModelAudit", ms.Scanner.Name)
+	suite.Equal(3, ms.Summary.FilesScanned)
+
+	// merge two summaries
+	merged, err := MergeSummary(v1.MimeTypeModelSecurityReport, ms, ms)
+	require.NoError(suite.T(), err)
+	suite.Equal(2, merged.(*modelsecurity.ReportSummary).Summary.Total)
+	_, err = MergeSummary(v1.MimeTypeModelSecurityReport, ms, "wrong")
+	require.Error(suite.T(), err)
+
+	// not finished: status only
+	r.Status = "Running"
+	summary, err = GenerateSummary(r)
+	require.NoError(suite.T(), err)
+	suite.Equal("Running", summary.(*modelsecurity.ReportSummary).ScanStatus)
+	suite.Nil(summary.(*modelsecurity.ReportSummary).Summary)
+
+	// resolve and merge the reports
+	resolved, err := ResolveData(v1.MimeTypeModelSecurityReport, []byte(jsonData))
+	require.NoError(suite.T(), err)
+	mergedReport, err := Merge(v1.MimeTypeModelSecurityReport, resolved, resolved)
+	require.NoError(suite.T(), err)
+	suite.Len(mergedReport.(*modelsecurity.Report).Findings, 2)
 }

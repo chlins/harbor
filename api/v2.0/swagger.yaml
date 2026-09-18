@@ -1537,7 +1537,9 @@ paths:
   /projects/{project_name}/repositories/{repository_name}/artifacts/{reference}/additions/vulnerabilities:
     get:
       summary: Get the vulnerabilities addition of the specific artifact
-      description: Get the vulnerabilities addition of the artifact specified by the reference under the project and repository.
+      description: |-
+        Get the vulnerabilities addition of the artifact specified by the reference under the project and repository.
+        For AI model artifacts the same endpoint returns the model security report when the X-Accept-Vulnerabilities header contains 'application/vnd.security.model.report+json; version=1.0'.
       tags:
         - artifact
       operationId: getVulnerabilitiesAddition
@@ -6870,7 +6872,8 @@ parameters:
     default: 'application/vnd.security.vulnerability.report; version=1.1, application/vnd.scanner.adapter.vuln.report.harbor+json; version=1.0'
     description: |-
       A comma-separated lists of MIME types for the scan report or scan summary. The first mime type will be used when the report found for it.
-      Currently the mime type supports 'application/vnd.scanner.adapter.vuln.report.harbor+json; version=1.0' and 'application/vnd.security.vulnerability.report; version=1.1'
+      Currently the mime type supports 'application/vnd.scanner.adapter.vuln.report.harbor+json; version=1.0' and 'application/vnd.security.vulnerability.report; version=1.1' for images,
+      and 'application/vnd.security.model.report+json; version=1.0' (the model security report) for AI model artifacts.
   projectName:
     name: project_name
     in: path
@@ -11079,5 +11082,5 @@ definitions:
     properties:
       scan_type:
         type: string
-        description: 'The scan type for the scan request. Two options are currently supported, vulnerability and sbom'
-        enum: [ vulnerability, sbom ]
+        description: 'The scan type for the scan request. Three options are currently supported: vulnerability and sbom for images, model-security and sbom for AI model artifacts'
+        enum: [ vulnerability, sbom, model-security ]

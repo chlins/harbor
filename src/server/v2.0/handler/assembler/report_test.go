@@ -20,6 +20,7 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
+	"github.com/goharbor/harbor/src/controller/artifact/processor/cnai"
 	v1sq "github.com/goharbor/harbor/src/pkg/scan/rest/v1"
 	"github.com/goharbor/harbor/src/pkg/task"
 	"github.com/goharbor/harbor/src/server/v2.0/handler/model"
@@ -53,6 +54,36 @@ func (suite *VulAssemblerTestSuite) TestScannable() {
 	suite.Nil(assembler.WithArtifacts(&artifact).Assemble(context.TODO()))
 	suite.Len(artifact.AdditionLinks, 2)
 	suite.Equal(artifact.ScanOverview, summary)
+}
+
+func (suite *VulAssemblerTestSuite) TestScannableModel() {
+	checker := &scan.Checker{}
+	scanCtl := &scan.Controller{}
+
+	assembler := ScanReportAssembler{
+		scanChecker:    checker,
+		scanCtl:        scanCtl,
+		overviewOption: model.NewOverviewOptions(model.WithVuln(true)),
+		mimeTypes:      []string{v1sq.MimeTypeGenericVulnerabilityReport},
+	}
+
+	mock.OnAnything(checker, "IsScannable").Return(true, nil)
+
+	summary := map[string]any{"key": "value"}
+	// the model security summary is requested regardless of the vulnerability mime types asked by the client
+	scanCtl.On("GetSummary", mock.Anything, mock.Anything, v1sq.ScanTypeModelSecurity, []string{v1sq.MimeTypeModelSecurityReport}).Return(summary, nil)
+
+	var artifact model.Artifact
+	artifact.Type = cnai.ArtifactTypeCNAI
+	artifact.RepositoryName = "library/model"
+	artifact.Digest = "sha256:abc"
+
+	suite.Nil(assembler.WithArtifacts(&artifact).Assemble(context.TODO()))
+	suite.Equal(artifact.ScanOverview, summary)
+	suite.Nil(artifact.AdditionLinks["vulnerabilities"])
+	suite.NotNil(artifact.AdditionLinks["security"])
+	suite.Contains(artifact.AdditionLinks["security"].HREF, "/additions/vulnerabilities")
+	suite.NotNil(artifact.AdditionLinks["sboms"])
 }
 
 func (suite *VulAssemblerTestSuite) TestNotScannable() {

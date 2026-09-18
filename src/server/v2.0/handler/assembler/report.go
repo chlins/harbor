@@ -17,6 +17,7 @@ package assembler
 import (
 	"context"
 
+	"github.com/goharbor/harbor/src/controller/artifact/processor/cnai"
 	"github.com/goharbor/harbor/src/controller/scan"
 	"github.com/goharbor/harbor/src/lib"
 	"github.com/goharbor/harbor/src/lib/log"
@@ -29,6 +30,9 @@ import (
 
 const (
 	vulnerabilitiesAddition = "vulnerabilities"
+	// securityAddition is the addition link name of the model security report of AI model artifacts.
+	// The report is served by the vulnerabilities addition endpoint with the model report mime type.
+	securityAddition = "security"
 )
 
 // NewScanReportAssembler returns vul assembler
@@ -75,11 +79,20 @@ func (assembler *ScanReportAssembler) Assemble(ctx context.Context) error {
 			continue
 		}
 
-		artifact.SetAdditionLink(vulnerabilitiesAddition, version)
+		scanType := v1.ScanTypeVulnerability
+		mimeTypes := assembler.mimeTypes
+		if artifact.Type == cnai.ArtifactTypeCNAI {
+			// AI models get a model security report instead of a vulnerability report
+			scanType = v1.ScanTypeModelSecurity
+			mimeTypes = []string{v1.MimeTypeModelSecurityReport}
+			artifact.SetAdditionLinkAlias(securityAddition, vulnerabilitiesAddition, version)
+		} else {
+			artifact.SetAdditionLink(vulnerabilitiesAddition, version)
+		}
 
 		if assembler.overviewOption.WithVuln {
-			for _, mimeType := range assembler.mimeTypes {
-				overview, err := assembler.scanCtl.GetSummary(ctx, &artifact.Artifact, v1.ScanTypeVulnerability, []string{mimeType})
+			for _, mimeType := range mimeTypes {
+				overview, err := assembler.scanCtl.GetSummary(ctx, &artifact.Artifact, scanType, []string{mimeType})
 				if err != nil {
 					log.Warningf("get scan summary of artifact %s@%s for %s failed, error:%v", artifact.RepositoryName, artifact.Digest, mimeType, err)
 				} else if len(overview) > 0 {

@@ -344,8 +344,10 @@ func (a *ArtifactEventHandler) onDelete(ctx context.Context, event *event.Artifa
 	// clean up the scan executions of this artifact and it's references by id
 	log.Debugf("delete the associated scan executions of artifacts %v as the artifacts have been deleted", ids)
 	for _, id := range ids {
-		if err := execMgr.DeleteByVendor(ctx, job.ImageScanJobVendorType, id); err != nil {
-			log.Errorf("failed to delete scan executions of artifact %d, error: %v", id, err)
+		for _, vendorType := range []string{job.ImageScanJobVendorType, job.SBOMJobVendorType, job.ModelScanJobVendorType} {
+			if err := execMgr.DeleteByVendor(ctx, vendorType, id); err != nil {
+				log.Errorf("failed to delete %s executions of artifact %d, error: %v", vendorType, id, err)
+			}
 		}
 	}
 

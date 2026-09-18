@@ -84,6 +84,14 @@ func (artifact *Artifact) SetAdditionLink(addition, version string) {
 	artifact.AdditionLinks[addition] = &AdditionLink{HREF: href, Absolute: false}
 }
 
+// SetAdditionLinkAlias set an addition link named "name" that points to the endpoint of "addition",
+// e.g. the "security" link of AI models is served by the vulnerabilities addition endpoint
+func (artifact *Artifact) SetAdditionLinkAlias(name, addition, version string) {
+	artifact.SetAdditionLink(addition, version)
+	artifact.AdditionLinks[name] = artifact.AdditionLinks[addition]
+	delete(artifact.AdditionLinks, addition)
+}
+
 // SetSBOMAdditionLink set the link of SBOM addition
 func (artifact *Artifact) SetSBOMAdditionLink(sbomDgst string, version string) {
 	if artifact.AdditionLinks == nil {

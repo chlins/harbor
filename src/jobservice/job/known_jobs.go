@@ -26,6 +26,8 @@ const (
 	ImageScanJobVendorType = "IMAGE_SCAN"
 	// SBOMJobVendorType key to create sbom generate execution.
 	SBOMJobVendorType = "SBOM"
+	// ModelScanJobVendorType key to create model security scan execution.
+	ModelScanJobVendorType = "MODEL_SCAN"
 	// GarbageCollectionVendorType job name
 	GarbageCollectionVendorType = "GARBAGE_COLLECTION"
 	// ReplicationVendorType : the name of the replication job in job service
@@ -59,6 +61,7 @@ var (
 	executionSweeperCount = map[string]int64{
 		ImageScanJobVendorType:          lib.GetEnvInt64("IMAGE_SCAN_EXECUTION_RETENTION_COUNT", 1),
 		SBOMJobVendorType:               lib.GetEnvInt64("SBOM_EXECUTION_RETENTION_COUNT", 1),
+		ModelScanJobVendorType:          lib.GetEnvInt64("MODEL_SCAN_EXECUTION_RETENTION_COUNT", 1),
 		ScanAllVendorType:               lib.GetEnvInt64("SCAN_ALL_EXECUTION_RETENTION_COUNT", 1),
 		PurgeAuditVendorType:            lib.GetEnvInt64("PURGE_AUDIT_EXECUTION_RETENTION_COUNT", 10),
 		ExecSweepVendorType:             lib.GetEnvInt64("EXECUTION_SWEEP_EXECUTION_RETENTION_COUNT", 10),
