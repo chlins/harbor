@@ -130,5 +130,5 @@ func (s *scanAPI) GetReportLog(ctx context.Context, params operation.GetReportLo
 }
 
 func validScanType(scanType string) bool {
-	return scanType == "sbom" || scanType == "vulnerability"
+	return scanType == v1.ScanTypeSbom || scanType == v1.ScanTypeVulnerability || scanType == v1.ScanTypeModelSecurity
 }

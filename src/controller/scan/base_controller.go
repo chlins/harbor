@@ -1082,6 +1082,11 @@ func (bc *basicController) assembleReports(ctx context.Context, reports ...*scan
 			report.Status = job.ErrorStatus.String()
 		}
 
+		// only vulnerability reports are stored in the relational schema, other report types
+		// (sbom, model security) are kept as the JSON blob returned by the scanner
+		if !isVulnerabilityReport(report.MimeType) {
+			continue
+		}
 		completeReport, err := bc.reportConverter.FromRelationalSchema(ctx, report.UUID, report.Digest, report.Report)
 		if err != nil {
 			return err
@@ -1090,6 +1095,10 @@ func (bc *basicController) assembleReports(ctx context.Context, reports ...*scan
 	}
 
 	return nil
+}
+
+func isVulnerabilityReport(mimeType string) bool {
+	return mimeType == v1.MimeTypeNativeReport || mimeType == v1.MimeTypeGenericVulnerabilityReport || mimeType == v1.MimeTypeRawReport
 }
 
 func (bc *basicController) getLatestTagOfArtifact(ctx context.Context, artifactID int64) (string, error) {

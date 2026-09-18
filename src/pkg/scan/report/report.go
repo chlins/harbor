@@ -17,6 +17,7 @@ package report
 import (
 	"github.com/goharbor/harbor/src/lib/errors"
 	"github.com/goharbor/harbor/src/pkg/scan/dao/scan"
+	modelsecurity "github.com/goharbor/harbor/src/pkg/scan/modelsecurity/model"
 	v1 "github.com/goharbor/harbor/src/pkg/scan/rest/v1"
 	"github.com/goharbor/harbor/src/pkg/scan/vuln"
 )
@@ -28,6 +29,7 @@ type Merger func(r1, r2 any) (any, error)
 var SupportedMergers = map[string]Merger{
 	v1.MimeTypeNativeReport:               MergeNativeReport,
 	v1.MimeTypeGenericVulnerabilityReport: MergeNativeReport,
+	v1.MimeTypeModelSecurityReport:        MergeModelSecurityReport,
 }
 
 // Merge merge report r1 and r2
@@ -38,6 +40,21 @@ func Merge(mimeType string, r1, r2 any) (any, error) {
 	}
 
 	return m(r1, r2)
+}
+
+// MergeModelSecurityReport merge model security report r1 and r2
+func MergeModelSecurityReport(r1, r2 any) (any, error) {
+	mr1, ok := r1.(*modelsecurity.Report)
+	if !ok {
+		return nil, errors.New("model security report required")
+	}
+
+	mr2, ok := r2.(*modelsecurity.Report)
+	if !ok {
+		return nil, errors.New("model security report required")
+	}
+
+	return mr1.Merge(mr2), nil
 }
 
 // MergeNativeReport merge report r1 and r2

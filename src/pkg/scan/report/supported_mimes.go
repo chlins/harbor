@@ -19,6 +19,7 @@ import (
 	"reflect"
 
 	"github.com/goharbor/harbor/src/lib/errors"
+	modelsecurity "github.com/goharbor/harbor/src/pkg/scan/modelsecurity/model"
 	v1 "github.com/goharbor/harbor/src/pkg/scan/rest/v1"
 	"github.com/goharbor/harbor/src/pkg/scan/vuln"
 )
@@ -28,6 +29,8 @@ var SupportedMimes = map[string]any{
 	// The native report type
 	v1.MimeTypeNativeReport:               (*vuln.Report)(nil),
 	v1.MimeTypeGenericVulnerabilityReport: (*vuln.Report)(nil),
+	// The model security report type
+	v1.MimeTypeModelSecurityReport: (*modelsecurity.Report)(nil),
 }
 
 // ResolveData is a helper func to parse the JSON data with the given mime type.

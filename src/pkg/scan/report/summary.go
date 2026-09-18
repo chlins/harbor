@@ -20,6 +20,7 @@ import (
 	"github.com/goharbor/harbor/src/jobservice/job"
 	"github.com/goharbor/harbor/src/lib/errors"
 	"github.com/goharbor/harbor/src/pkg/scan/dao/scan"
+	modelsecurity "github.com/goharbor/harbor/src/pkg/scan/modelsecurity/model"
 	v1 "github.com/goharbor/harbor/src/pkg/scan/rest/v1"
 	"github.com/goharbor/harbor/src/pkg/scan/vuln"
 )
@@ -47,6 +48,7 @@ type SummaryMerger func(s1, s2 any) (any, error)
 var SupportedSummaryMergers = map[string]SummaryMerger{
 	v1.MimeTypeNativeReport:               MergeNativeSummary,
 	v1.MimeTypeGenericVulnerabilityReport: MergeNativeSummary,
+	v1.MimeTypeModelSecurityReport:        MergeModelSecuritySummary,
 }
 
 // MergeSummary merge summary s1 and s2
@@ -78,6 +80,7 @@ func MergeNativeSummary(s1, s2 any) (any, error) {
 var SupportedGenerators = map[string]SummaryGenerator{
 	v1.MimeTypeNativeReport:               GenerateNativeSummary,
 	v1.MimeTypeGenericVulnerabilityReport: GenerateNativeSummary,
+	v1.MimeTypeModelSecurityReport:        GenerateModelSecuritySummary,
 }
 
 // GenerateSummary is a helper function to generate report
@@ -136,6 +139,65 @@ func GenerateNativeSummary(r *scan.Report, _ ...Option) (any, error) {
 	sum.Scanner = rp.Scanner
 
 	sum.UpdateSeveritySummary(rp.GetVulnerabilityItemList())
+
+	return sum, nil
+}
+
+// MergeModelSecuritySummary merge modelsecurity.ReportSummary together
+func MergeModelSecuritySummary(s1, s2 any) (any, error) {
+	ms1, ok := s1.(*modelsecurity.ReportSummary)
+	if !ok {
+		return nil, errors.New("model security summary required")
+	}
+
+	ms2, ok := s2.(*modelsecurity.ReportSummary)
+	if !ok {
+		return nil, errors.New("model security summary required")
+	}
+
+	return ms1.Merge(ms2), nil
+}
+
+// GenerateModelSecuritySummary generates the report summary for the model security report.
+func GenerateModelSecuritySummary(r *scan.Report, _ ...Option) (any, error) {
+	sum := &modelsecurity.ReportSummary{}
+	sum.ReportID = r.UUID
+	sum.StartTime = r.StartTime
+	sum.EndTime = r.EndTime
+	sum.Duration = max(r.EndTime.Unix()-r.StartTime.Unix(), 0)
+
+	sum.ScanStatus = job.ErrorStatus.String()
+	if job.Status(r.Status).Code() != -1 {
+		sum.ScanStatus = r.Status
+	}
+
+	sum.TotalCount = 1
+
+	// If the status is not success, there will not be any report.
+	if r.Status != job.SuccessStatus.String() {
+		return sum, nil
+	}
+
+	// Probably no report data if the job is interrupted
+	if len(r.Report) == 0 {
+		return nil, errors.Errorf("no report data for %s, status is: %s", r.UUID, sum.ScanStatus)
+	}
+
+	raw, err := ResolveData(r.MimeType, []byte(r.Report))
+	if err != nil {
+		return nil, err
+	}
+
+	rp, ok := raw.(*modelsecurity.Report)
+	if !ok {
+		return nil, errors.Errorf("type mismatch: expect *modelsecurity.Report but got %s", reflect.TypeOf(raw).String())
+	}
+
+	sum.CompleteCount = 1
+	sum.CompletePercent = 100
+	sum.Severity = rp.Severity
+	sum.Scanner = rp.Scanner
+	sum.Summary = rp.Summary
 
 	return sum, nil
 }
