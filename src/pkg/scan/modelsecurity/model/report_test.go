@@ -109,7 +109,7 @@ func TestReportSummaryMerge(t *testing.T) {
 		StartTime:     start,
 		EndTime:       start.Add(10 * time.Second),
 		Scanner:       &v1.Scanner{Name: "s1"},
-		Summary:       &Summary{Total: 1, Medium: 1, FilesScanned: 1},
+		Summary:       (&Summary{Total: 1, Medium: 1, FilesScanned: 1}).SeveritySummary(),
 		TotalCount:    1,
 		CompleteCount: 1,
 	}
@@ -119,7 +119,7 @@ func TestReportSummaryMerge(t *testing.T) {
 		StartTime:     start.Add(time.Second),
 		EndTime:       start.Add(30 * time.Second),
 		Scanner:       &v1.Scanner{Name: "s2"},
-		Summary:       &Summary{Total: 1, Critical: 1, FilesScanned: 2},
+		Summary:       (&Summary{Total: 1, Critical: 1, FilesScanned: 2}).SeveritySummary(),
 		TotalCount:    1,
 		CompleteCount: 0,
 	}
@@ -131,5 +131,16 @@ func TestReportSummaryMerge(t *testing.T) {
 	assert.Equal(t, 50, m.CompletePercent)
 	assert.EqualValues(t, 30, m.Duration)
 	assert.Equal(t, 2, m.Summary.Total)
-	assert.Equal(t, 3, m.Summary.FilesScanned)
+	assert.Equal(t, 1, m.Summary.Summary[vuln.Critical])
+	assert.Equal(t, 1, m.Summary.Summary[vuln.Medium])
+}
+
+func TestSeveritySummary(t *testing.T) {
+	var s *Summary
+	assert.Nil(t, s.SeveritySummary())
+	vs := (&Summary{Total: 3, Critical: 2, Low: 1}).SeveritySummary()
+	assert.Equal(t, 3, vs.Total)
+	assert.Equal(t, 0, vs.Fixable)
+	assert.Equal(t, 2, vs.Summary[vuln.Critical])
+	assert.Equal(t, 1, vs.Summary[vuln.Low])
 }
