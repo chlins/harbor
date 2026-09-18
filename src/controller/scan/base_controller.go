@@ -260,6 +260,7 @@ func (bc *basicController) Scan(ctx context.Context, artifact *ar.Artifact, opti
 	if err != nil {
 		return errors.Wrap(err, "scan controller: scan")
 	}
+	opts.resolveScanType(artifact)
 
 	if !scannable {
 		if opts.FromEvent {
@@ -368,6 +369,7 @@ func (bc *basicController) Stop(ctx context.Context, artifact *ar.Artifact, capT
 	if artifact == nil {
 		return errors.New("nil artifact to stop scan")
 	}
+	capType = (&Options{ScanType: capType}).resolveScanType(artifact)
 	vendorType := sca.GetScanHandler(capType).JobVendorType()
 	query := q.New(q.KeyWords{"vendor_type": vendorType, "extra_attrs.artifact.digest": artifact.Digest, "extra_attrs.enabled_capabilities.type": capType})
 	executions, err := bc.execMgr.List(ctx, query)
