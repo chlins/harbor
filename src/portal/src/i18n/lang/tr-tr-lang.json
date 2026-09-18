@@ -1486,6 +1486,7 @@
         "ACTION": "ACTION"
     },
     "SECURITY": {
+        "SCAN_NOW": "TARA",
         "SEVERITY": "Önem derecesi:",
         "NO_FINDINGS": "Güvenlik bulgusu yok",
         "FILES_SCANNED": "Taranan dosyalar",

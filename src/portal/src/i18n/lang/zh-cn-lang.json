@@ -1488,6 +1488,7 @@
         "ACTION": "操作"
     },
     "SECURITY": {
+        "SCAN_NOW": "扫描",
         "SEVERITY": "严重程度：",
         "NO_FINDINGS": "未发现安全问题",
         "FILES_SCANNED": "已扫描文件",

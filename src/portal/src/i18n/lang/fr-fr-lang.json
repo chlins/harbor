@@ -1488,6 +1488,7 @@
         "ACTION": "Action"
     },
     "SECURITY": {
+        "SCAN_NOW": "ANALYSER",
         "SEVERITY": "Sévérité :",
         "NO_FINDINGS": "Aucun problème de sécurité",
         "FILES_SCANNED": "Fichiers analysés",

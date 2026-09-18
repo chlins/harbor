@@ -1486,6 +1486,7 @@
         "ACTION": "ACTION"
     },
     "SECURITY": {
+        "SCAN_NOW": "스캔",
         "SEVERITY": "심각도:",
         "NO_FINDINGS": "보안 문제 없음",
         "FILES_SCANNED": "스캔한 파일",

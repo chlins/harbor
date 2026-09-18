@@ -1487,6 +1487,7 @@
         "ACTION": "操作"
     },
     "SECURITY": {
+        "SCAN_NOW": "掃描",
         "SEVERITY": "嚴重程度：",
         "NO_FINDINGS": "未發現安全問題",
         "FILES_SCANNED": "已掃描檔案",

@@ -1486,6 +1486,7 @@
         "ACTION": "ACTION"
     },
     "SECURITY": {
+        "SCAN_NOW": "SCAN",
         "SEVERITY": "Severity:",
         "NO_FINDINGS": "No security finding",
         "FILES_SCANNED": "Files scanned",

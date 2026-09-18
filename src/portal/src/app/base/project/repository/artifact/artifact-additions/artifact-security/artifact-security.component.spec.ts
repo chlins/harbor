@@ -152,6 +152,6 @@ describe('ArtifactSecurityComponent', () => {
         fixture.autoDetectChanges(true);
         const scanBtn: HTMLButtonElement =
             fixture.nativeElement.querySelector('#scan-btn');
-        expect(scanBtn.innerText).toContain('VULNERABILITY.SCAN_NOW');
+        expect(scanBtn.innerText).toContain('SECURITY.SCAN_NOW');
     });
 });
