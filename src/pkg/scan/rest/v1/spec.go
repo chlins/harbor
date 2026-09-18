@@ -29,6 +29,8 @@ const (
 	MimeTypeOCIArtifact = "application/vnd.oci.image.manifest.v1+json"
 	// MimeTypeDockerArtifact defines the mime type for docker artifact
 	MimeTypeDockerArtifact = "application/vnd.docker.distribution.manifest.v2+json"
+	// MimeTypeModelArtifact defines the mime type for CNCF model (ModelPack) artifact
+	MimeTypeModelArtifact = "application/vnd.cncf.model.manifest.v1+json"
 	// MimeTypeNativeReport defines the mime type for native report
 	MimeTypeNativeReport = "application/vnd.scanner.adapter.vuln.report.harbor+json; version=1.0"
 	// MimeTypeRawReport defines the mime type for raw report
@@ -43,9 +45,14 @@ const (
 	MimeTypeSBOMReport = "application/vnd.security.sbom.report+json; version=1.0"
 	// MimeTypeGenericVulnerabilityReport defines the MIME type for the generic report with enhanced information
 	MimeTypeGenericVulnerabilityReport = "application/vnd.security.vulnerability.report; version=1.1"
+	// MimeTypeModelSecurityReport defines the mime type for the model security report
+	MimeTypeModelSecurityReport = "application/vnd.security.model.report+json; version=1.0"
+	// MimeTypeModelRawReport defines the mime type for the raw model security report
+	MimeTypeModelRawReport = "application/vnd.scanner.adapter.model.report.raw"
 
 	ScanTypeVulnerability = "vulnerability"
 	ScanTypeSbom          = "sbom"
+	ScanTypeModelSecurity = "model-security"
 
 	apiPrefix = "/api/v1"
 )

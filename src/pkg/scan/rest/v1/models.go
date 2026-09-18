@@ -25,12 +25,21 @@ import (
 const (
 	supportVulnerability = "support_vulnerability"
 	supportSBOM          = "support_sbom"
+	supportModelSecurity = "support_model_security"
 )
 
 var supportedMimeTypes = []string{
 	MimeTypeNativeReport,
 	MimeTypeGenericVulnerabilityReport,
 	MimeTypeSBOMReport,
+	MimeTypeModelSecurityReport,
+}
+
+// supportedArtifactMimeTypes are the artifact manifest mime types a capability may consume.
+var supportedArtifactMimeTypes = []string{
+	MimeTypeDockerArtifact,
+	MimeTypeOCIArtifact,
+	MimeTypeModelArtifact,
 }
 
 // Scanner represents metadata of a Scanner Adapter which allow Harbor to lookup a scanner capable of
@@ -57,7 +66,7 @@ type Scanner struct {
 //     -- application/vnd.scanner.adapter.vuln.report.harbor+json; version=1.0
 //     -- application/vnd.scanner.adapter.vuln.report.raw
 type ScannerCapability struct {
-	// The type of the scanner capability, vulnerability or sbom
+	// The type of the scanner capability, vulnerability, sbom or model-security
 	Type string `json:"type"`
 	// The set of MIME types of the artifacts supported by the scanner to produce the reports
 	// specified in the "produces_mime_types". A given mime type should only be present in one
@@ -95,18 +104,16 @@ func (md *ScannerAdapterMetadata) Validate() error {
 	}
 
 	for _, ca := range md.Capabilities {
-		// v1.MimeTypeDockerArtifact is required now
-		found := slices.Contains(ca.ConsumesMimeTypes, MimeTypeDockerArtifact)
+		// at least one supported artifact manifest mime type (docker image, OCI image or CNCF model) is required
+		found := slices.ContainsFunc(ca.ConsumesMimeTypes, isSupportedArtifactMimeType)
 		if !found {
-			return errors.Errorf("missing %s in consumes_mime_types", MimeTypeDockerArtifact)
+			return errors.Errorf("missing one of %v in consumes_mime_types", supportedArtifactMimeTypes)
 		}
 
-		// either of v1.MimeTypeNativeReport OR v1.MimeTypeGenericVulnerabilityReport is required
-		found = slices.ContainsFunc(ca.ProducesMimeTypes, func(pm string) bool {
-			return isSupportedMimeType(pm)
-		})
+		// a report mime type that Harbor can interpret is required
+		found = slices.ContainsFunc(ca.ProducesMimeTypes, isSupportedMimeType)
 		if !found {
-			return errors.Errorf("missing %s or %s in produces_mime_types", MimeTypeNativeReport, MimeTypeGenericVulnerabilityReport)
+			return errors.Errorf("missing one of %v in produces_mime_types", supportedMimeTypes)
 		}
 	}
 
@@ -115,6 +122,15 @@ func (md *ScannerAdapterMetadata) Validate() error {
 
 func isSupportedMimeType(mimeType string) bool {
 	return slices.Contains(supportedMimeTypes, mimeType)
+}
+
+func isSupportedArtifactMimeType(mimeType string) bool {
+	return slices.Contains(supportedArtifactMimeTypes, mimeType)
+}
+
+// IsModelMimeType returns true when the mime type identifies a CNCF model artifact.
+func IsModelMimeType(mimeType string) bool {
+	return mimeType == MimeTypeModelArtifact
 }
 
 // HasCapability returns true when mine type of the artifact support by the scanner
@@ -143,10 +159,13 @@ func (md *ScannerAdapterMetadata) ConvertCapability() map[string]any {
 		if len(c.Type) > 0 {
 			oldScanner = false
 		}
-		if c.Type == ScanTypeVulnerability {
+		switch c.Type {
+		case ScanTypeVulnerability:
 			capabilities[supportVulnerability] = true
-		} else if c.Type == ScanTypeSbom {
+		case ScanTypeSbom:
 			capabilities[supportSBOM] = true
+		case ScanTypeModelSecurity:
+			capabilities[supportModelSecurity] = true
 		}
 	}
 	if oldScanner && len(capabilities) == 0 {
