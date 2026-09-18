@@ -19,6 +19,8 @@ from library.scanner import Scanner
 MODELAUDIT_ADAPTER_URL = os.environ.get("MODELAUDIT_ADAPTER_URL", "")
 MODEL_REPORT_MIME_TYPE = "application/vnd.security.model.report+json; version=1.0"
 MODEL_MANIFEST_MIME_TYPE = "application/vnd.cncf.model.manifest.v1+json"
+# oras talks https by default, allow plain http Harbor instances in dev
+ORAS_FLAGS = ["--plain-http"] if os.environ.get("HARBOR_HOST_SCHEMA", "https") == "http" else []
 
 
 class _Evil(object):
@@ -43,8 +45,8 @@ def push_model(project, repo, tag):
         with open("annotations.json", "w") as f:
             f.write(json.dumps({"model.pkl": {"org.cncf.model.filepath": "model.pkl"},
                                 "config.json": {"org.cncf.model.filepath": "config.json"}}))
-        base.run_command(["oras", "login", "-u", ADMIN_CLIENT["username"], "-p", ADMIN_CLIENT["password"], harbor_server])
-        base.run_command(["oras", "push", "{}/{}/{}:{}".format(harbor_server, project, repo, tag),
+        base.run_command(["oras", "login", "-u", ADMIN_CLIENT["username"], "-p", ADMIN_CLIENT["password"], harbor_server] + ORAS_FLAGS)
+        base.run_command(["oras", "push", "{}/{}/{}:{}".format(harbor_server, project, repo, tag)] + ORAS_FLAGS + [
                           "--artifact-type", MODEL_MANIFEST_MIME_TYPE,
                           "--config", "model-config.json:application/vnd.cncf.model.config.v1+json",
                           "--annotation-file", "annotations.json",
@@ -144,9 +146,7 @@ class TestModelScan(unittest.TestCase):
                                                with_sbom_overview=True, with_accessory=True, **client)
         sbom_digest = art.sbom_overview.sbom_digest
         self.assertTrue(sbom_digest)
-        sbom, status_code, _ = self.artifact.get_addition(TestModelScan.project_name, TestModelScan.repo_name, sbom_digest, "sbom", **client)
-        self.assertEqual(200, status_code)
-        sbom = json.loads(sbom)
+        sbom = json.loads(self.artifact.get_addition_raw(TestModelScan.project_name, TestModelScan.repo_name, sbom_digest, "sbom", **client))
         self.assertEqual("CycloneDX", sbom["bomFormat"])
         self.assertEqual({"model.pkl", "config.json"}, {c["name"] for c in sbom["components"]})
 
