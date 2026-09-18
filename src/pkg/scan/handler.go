@@ -46,7 +46,7 @@ type Handler interface {
 	// RequiredPermissions defines the permission used by the scan robot account
 	RequiredPermissions() []*types.Policy
 	// RequestParameters defines the parameters for scan request
-	RequestParameters() map[string]any
+	RequestParameters(sr *v1.ScanRequest) map[string]any
 	// PostScan defines the operation after scan
 	PostScan(ctx job.Context, sr *v1.ScanRequest, rp *scan.Report, rawReport string, startTime time.Time, robot *model.Robot) (string, error)
 	ReportHandler

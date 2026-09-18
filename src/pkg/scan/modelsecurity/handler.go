@@ -63,7 +63,7 @@ func (h *scanHandler) RequestProducesMineTypes() []string {
 }
 
 // RequestParameters defines the parameters for scan request
-func (h *scanHandler) RequestParameters() map[string]any {
+func (h *scanHandler) RequestParameters(_ *v1.ScanRequest) map[string]any {
 	return nil
 }
 

@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
@@ -55,6 +56,8 @@ func Test_scanHandler_ReportURLParameter(t *testing.T) {
 		wantErr bool
 	}{
 		{"normal test", args{&v1.ScanRequest{}}, "sbom_media_type=application%2Fspdx%2Bjson", false},
+		{"image", args{&v1.ScanRequest{Artifact: &v1.Artifact{MimeType: v1.MimeTypeDockerArtifact}}}, "sbom_media_type=application%2Fspdx%2Bjson", false},
+		{"model", args{&v1.ScanRequest{Artifact: &v1.Artifact{MimeType: v1.MimeTypeModelArtifact}}}, "sbom_media_type=application%2Fvnd.cyclonedx%2Bjson", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -191,6 +194,51 @@ func (suite *SBOMTestSuite) TestPostScan() {
 	accessory, err := suite.handler.PostScan(ctx, req, nil, rawReport, startTime, robot)
 	suite.Require().NoError(err)
 	suite.Require().NotEmpty(accessory)
+}
+
+func (suite *SBOMTestSuite) TestPostScanModel() {
+	req := &v1.ScanRequest{
+		Registry: &v1.Registry{URL: "http://myregistry.example.com"},
+		Artifact: &v1.Artifact{Repository: "library/model", MimeType: v1.MimeTypeModelArtifact},
+	}
+	robot := &model.Robot{Name: "robot", Secret: "mysecret"}
+	rawReport := `{"media_type": "application/vnd.cyclonedx+json", "scanner": {"name": "ModelAudit"}, "sbom": {"bomFormat": "CycloneDX"}}`
+	ctx := &jobservice.MockJobContext{}
+	ctx.On("GetLogger").Return(&jobservice.MockJobLogger{})
+
+	var gotAnnotations map[string]string
+	h := *suite.handler
+	h.GenAccessoryFunc = func(_ v1.ScanRequest, content []byte, annotations map[string]string, mediaType string, _ *model.Robot) (string, error) {
+		gotAnnotations = annotations
+		suite.Equal(sbomMimeType, mediaType)
+		suite.Contains(string(content), "CycloneDX")
+		return "sha256:cdx", nil
+	}
+	report, err := h.PostScan(ctx, req, nil, rawReport, time.Now(), robot)
+	suite.Require().NoError(err)
+	suite.Contains(report, "sha256:cdx")
+	suite.Equal(sbomMediaTypeCycloneDX, gotAnnotations[annotationSBOMMediaType])
+	suite.Equal("CycloneDX JSON SBOM", gotAnnotations["org.opencontainers.artifact.description"])
+	suite.True(req.Registry.Insecure)
+
+	// media type defaults from the artifact kind when the scanner omits it
+	h.GenAccessoryFunc = func(_ v1.ScanRequest, _ []byte, annotations map[string]string, _ string, _ *model.Robot) (string, error) {
+		gotAnnotations = annotations
+		return "sha256:x", nil
+	}
+	_, err = h.PostScan(ctx, req, nil, `{"sbom": {}}`, time.Now(), robot)
+	suite.Require().NoError(err)
+	suite.Equal(sbomMediaTypeCycloneDX, gotAnnotations[annotationSBOMMediaType])
+	_, err = h.PostScan(ctx, &v1.ScanRequest{Registry: &v1.Registry{URL: "r"}, Artifact: &v1.Artifact{MimeType: v1.MimeTypeDockerArtifact}}, nil, `{"sbom": {}}`, time.Now(), robot)
+	suite.Require().NoError(err)
+	suite.Equal(sbomMediaTypeSpdx, gotAnnotations[annotationSBOMMediaType])
+}
+
+func TestRequestParameters(t *testing.T) {
+	h := &scanHandler{}
+	assert.Equal(t, map[string]any{"sbom_media_types": []string{sbomMediaTypeSpdx}}, h.RequestParameters(nil))
+	assert.Equal(t, map[string]any{"sbom_media_types": []string{sbomMediaTypeCycloneDX}},
+		h.RequestParameters(&v1.ScanRequest{Artifact: &v1.Artifact{MimeType: v1.MimeTypeModelArtifact}}))
 }
 
 func (suite *SBOMTestSuite) TestMakeReportPlaceHolder() {

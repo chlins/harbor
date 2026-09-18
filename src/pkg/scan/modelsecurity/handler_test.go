@@ -82,7 +82,7 @@ func scanTask(reportUUID string, status job.Status) *task.Task {
 func TestHandlerStatics(t *testing.T) {
 	h := &scanHandler{}
 	assert.Equal(t, []string{v1.MimeTypeModelSecurityReport}, h.RequestProducesMineTypes())
-	assert.Nil(t, h.RequestParameters())
+	assert.Nil(t, h.RequestParameters(nil))
 	assert.Equal(t, job.ModelScanJobVendorType, h.JobVendorType())
 	p, err := h.URLParameter(nil)
 	require.NoError(t, err)
