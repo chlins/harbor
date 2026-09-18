@@ -1495,6 +1495,7 @@
         "ACTION": "AÇÃO"
     },
     "SECURITY": {
+        "OVERALL_SEVERITY": "Severidade de segurança:",
         "SCAN_NOW": "VERIFICAR",
         "SEVERITY": "Severidade:",
         "NO_FINDINGS": "Nenhum problema de segurança",

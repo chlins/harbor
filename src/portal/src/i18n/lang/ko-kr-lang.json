@@ -1486,6 +1486,7 @@
         "ACTION": "ACTION"
     },
     "SECURITY": {
+        "OVERALL_SEVERITY": "보안 심각도:",
         "SCAN_NOW": "스캔",
         "SEVERITY": "심각도:",
         "NO_FINDINGS": "보안 문제 없음",

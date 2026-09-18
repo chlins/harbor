@@ -1486,6 +1486,7 @@
         "ACTION": "AKTION"
     },
     "SECURITY": {
+        "OVERALL_SEVERITY": "Sicherheits-Schweregrad:",
         "SCAN_NOW": "SCANNEN",
         "SEVERITY": "Schweregrad:",
         "NO_FINDINGS": "Keine Sicherheitsbefunde",

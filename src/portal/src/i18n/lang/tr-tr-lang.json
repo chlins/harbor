@@ -1486,6 +1486,7 @@
         "ACTION": "ACTION"
     },
     "SECURITY": {
+        "OVERALL_SEVERITY": "Güvenlik önem derecesi:",
         "SCAN_NOW": "TARA",
         "SEVERITY": "Önem derecesi:",
         "NO_FINDINGS": "Güvenlik bulgusu yok",

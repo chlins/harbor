@@ -1489,6 +1489,7 @@
         "ACTION": "ACCION"
     },
     "SECURITY": {
+        "OVERALL_SEVERITY": "Severidad de seguridad:",
         "SCAN_NOW": "ESCANEAR",
         "SEVERITY": "Severidad:",
         "NO_FINDINGS": "Sin hallazgos de seguridad",

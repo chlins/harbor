@@ -1487,6 +1487,7 @@
         "ACTION": "操作"
     },
     "SECURITY": {
+        "OVERALL_SEVERITY": "安全嚴重程度：",
         "SCAN_NOW": "掃描",
         "SEVERITY": "嚴重程度：",
         "NO_FINDINGS": "未發現安全問題",
