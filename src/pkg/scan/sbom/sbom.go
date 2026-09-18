@@ -184,7 +184,7 @@ func retrieveSBOMContent(rawReport string) ([]byte, *v1.Scanner, error) {
 
 func (h *scanHandler) MakePlaceHolder(ctx context.Context, art *artifact.Artifact, r *scanner.Registration) (rps []*scanModel.Report, err error) {
 	mgr := h.SBOMMgrFunc()
-	mimeTypes := r.GetProducesMimeTypes(art.ManifestMediaType, v1.ScanTypeSbom)
+	mimeTypes := r.GetProducesMimeTypes(scan.ArtifactMimeType(art), v1.ScanTypeSbom)
 	if len(mimeTypes) == 0 {
 		return nil, errors.New("no mime types to make report placeholders")
 	}
@@ -303,9 +303,12 @@ func (h *scanHandler) GetSummary(ctx context.Context, art *artifact.Artifact, mi
 		return nil, errors.New("no way to get report summaries for nil artifact")
 	}
 	ds := h.ScannerControllerFunc()
-	r, err := ds.GetRegistrationByProject(ctx, art.ProjectID)
+	r, err := ds.GetRegistrationByArtifact(ctx, art.ProjectID, scan.ArtifactMimeType(art))
 	if err != nil {
 		return nil, errors.Wrap(err, "get sbom summary failed")
+	}
+	if r == nil {
+		return map[string]any{}, nil
 	}
 	reports, err := h.SBOMMgrFunc().GetBy(ctx, art.ID, r.UUID, mimeTypes[0], sbomMediaTypeSpdx)
 	if err != nil {

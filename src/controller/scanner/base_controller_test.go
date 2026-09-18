@@ -18,6 +18,7 @@ import (
 	"context"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -42,6 +43,11 @@ type ControllerTestSuite struct {
 	mMeta *metadatatesting.Manager
 
 	sample *scanner.Registration
+	meta   *v1.ScannerAdapterMetadata
+}
+
+func (suite *ControllerTestSuite) sampleMetadata() *v1.ScannerAdapterMetadata {
+	return suite.meta
 }
 
 // TestController is the entry of controller test suite
@@ -81,6 +87,8 @@ func (suite *ControllerTestSuite) SetupTest() {
 		Description: "sample registration",
 		URL:         "https://sample.scanner.com",
 	}
+
+	suite.meta = m
 
 	mc := &v1testing.Client{}
 	mc.On("GetMetadata").Return(m, nil)
@@ -231,6 +239,62 @@ func (suite *ControllerTestSuite) TestGetRegistrationByProject() {
 	assert.Equal(suite.T(), "forUT", r.Name)
 }
 
+// TestGetRegistrationByArtifact tests GetRegistrationByArtifact
+func (suite *ControllerTestSuite) TestGetRegistrationByArtifact() {
+	var pid int64 = 1
+	suite.sample.UUID = "uuid"
+	suite.mMeta.On("Get", mock.Anything, pid, proScannerMetaKey).Return(nil, nil)
+	suite.mMgr.On("GetDefault", mock.Anything).Return(suite.sample, nil)
+
+	// the project scanner (Trivy, images only) is kept for images
+	r, err := suite.c.GetRegistrationByArtifact(context.TODO(), pid, v1.MimeTypeDockerArtifact)
+	require.NoError(suite.T(), err)
+	require.NotNil(suite.T(), r)
+	assert.Equal(suite.T(), "forUT", r.Name)
+	assert.Equal(suite.T(), StatusHealthy, r.Health)
+
+	// for models it falls back to the first enabled registration with a model capability
+	modelMeta := &v1.ScannerAdapterMetadata{
+		Scanner: &v1.Scanner{Name: "ModelAudit", Vendor: "Promptfoo", Version: "0.2.52"},
+		Capabilities: []*v1.ScannerCapability{{
+			Type:              v1.ScanTypeModelSecurity,
+			ConsumesMimeTypes: []string{v1.MimeTypeModelArtifact},
+			ProducesMimeTypes: []string{v1.MimeTypeModelSecurityReport},
+		}},
+	}
+	modelScanner := &scanner.Registration{UUID: "model-uuid", Name: "modelaudit", URL: "https://model.scanner.com", CreateTime: time.Now()}
+	brokenScanner := &scanner.Registration{UUID: "broken-uuid", Name: "broken", URL: "https://broken.scanner.com", CreateTime: time.Now().Add(-time.Hour)}
+
+	mcp := &v1testing.ClientPool{}
+	imageClient := &v1testing.Client{}
+	imageClient.On("GetMetadata").Return(suite.sampleMetadata(), nil)
+	modelClient := &v1testing.Client{}
+	modelClient.On("GetMetadata").Return(modelMeta, nil)
+	brokenClient := &v1testing.Client{}
+	brokenClient.On("GetMetadata").Return(nil, fmt.Errorf("down"))
+	mcp.On("Get", suite.sample.URL, mock.Anything, mock.Anything, mock.Anything).Return(imageClient, nil)
+	mcp.On("Get", modelScanner.URL, mock.Anything, mock.Anything, mock.Anything).Return(modelClient, nil)
+	mcp.On("Get", brokenScanner.URL, mock.Anything, mock.Anything, mock.Anything).Return(brokenClient, nil)
+	suite.c.clientPool = mcp
+
+	suite.mMgr.On("List", mock.Anything, mock.Anything).Return([]*scanner.Registration{suite.sample, modelScanner, brokenScanner}, nil).Once()
+	r, err = suite.c.GetRegistrationByArtifact(context.TODO(), pid, v1.MimeTypeModelArtifact)
+	require.NoError(suite.T(), err)
+	require.NotNil(suite.T(), r)
+	assert.Equal(suite.T(), "modelaudit", r.Name)
+	assert.Equal(suite.T(), StatusHealthy, r.Health)
+	assert.Equal(suite.T(), "ModelAudit", r.Adapter)
+	assert.True(suite.T(), r.HasCapability(v1.MimeTypeModelArtifact))
+
+	// no capable registration at all: the project scanner is returned so callers report the usual error
+	suite.mMgr.On("List", mock.Anything, mock.Anything).Return([]*scanner.Registration{suite.sample}, nil).Once()
+	r, err = suite.c.GetRegistrationByArtifact(context.TODO(), pid, v1.MimeTypeModelArtifact)
+	require.NoError(suite.T(), err)
+	require.NotNil(suite.T(), r)
+	assert.Equal(suite.T(), "forUT", r.Name)
+	assert.False(suite.T(), r.HasCapability(v1.MimeTypeModelArtifact))
+}
+
 // TestGetRegistrationByProjectWhenPingError tests GetRegistrationByProject
 func (suite *ControllerTestSuite) TestGetRegistrationByProjectWhenPingError() {
 	m := make(map[string]string, 1)
@@ -285,6 +349,8 @@ func (suite *ControllerTestSuite) TestPingWithGenericMimeType() {
 			"extra": "testing",
 		},
 	}
+	suite.meta = m
+
 	mc := &v1testing.Client{}
 	mc.On("GetMetadata").Return(m, nil)
 

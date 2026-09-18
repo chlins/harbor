@@ -26,6 +26,7 @@ import (
 	"github.com/goharbor/harbor/src/jobservice/job"
 	"github.com/goharbor/harbor/src/lib/log"
 	"github.com/goharbor/harbor/src/pkg/notification"
+	sca "github.com/goharbor/harbor/src/pkg/scan"
 	v1 "github.com/goharbor/harbor/src/pkg/scan/rest/v1"
 	"github.com/goharbor/harbor/src/pkg/scheduler"
 	"github.com/goharbor/harbor/src/pkg/task"
@@ -116,7 +117,7 @@ func scanTaskStatusChange(ctx context.Context, taskID int64, status string) (err
 						Repository:  art.RepositoryName,
 						Digest:      art.Digest,
 						Tag:         getArtifactTag(t.ExtraAttrs),
-						MimeType:    art.ManifestMediaType,
+						MimeType:    sca.ArtifactMimeType(art),
 					},
 					Status: status,
 				}

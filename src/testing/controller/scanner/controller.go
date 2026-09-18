@@ -135,6 +135,36 @@ func (_m *Controller) GetRegistration(ctx context.Context, registrationUUID stri
 	return r0, r1
 }
 
+// GetRegistrationByArtifact provides a mock function with given fields: ctx, projectID, mimeType
+func (_m *Controller) GetRegistrationByArtifact(ctx context.Context, projectID int64, mimeType string) (*scanner.Registration, error) {
+	ret := _m.Called(ctx, projectID, mimeType)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetRegistrationByArtifact")
+	}
+
+	var r0 *scanner.Registration
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, int64, string) (*scanner.Registration, error)); ok {
+		return rf(ctx, projectID, mimeType)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, int64, string) *scanner.Registration); ok {
+		r0 = rf(ctx, projectID, mimeType)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*scanner.Registration)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, int64, string) error); ok {
+		r1 = rf(ctx, projectID, mimeType)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetRegistrationByProject provides a mock function with given fields: ctx, projectID, options
 func (_m *Controller) GetRegistrationByProject(ctx context.Context, projectID int64, options ...controllerscanner.Option) (*scanner.Registration, error) {
 	_va := make([]interface{}, len(options))

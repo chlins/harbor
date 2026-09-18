@@ -236,7 +236,7 @@ func (bc *basicController) Scan(ctx context.Context, artifact *ar.Artifact, opti
 		return errors.New("nil artifact to scan")
 	}
 
-	r, err := bc.sc.GetRegistrationByProject(ctx, artifact.ProjectID)
+	r, err := bc.sc.GetRegistrationByArtifact(ctx, artifact.ProjectID, sca.ArtifactMimeType(artifact))
 	if err != nil {
 		return errors.Wrap(err, "scan controller: scan")
 	}
@@ -266,7 +266,7 @@ func (bc *basicController) Scan(ctx context.Context, artifact *ar.Artifact, opti
 			// skip to return err for event related scan
 			return nil
 		}
-		return errors.BadRequestError(nil).WithMessagef("the configured scanner %s does not support scanning artifact with mime type %s", r.Name, artifact.ManifestMediaType)
+		return errors.BadRequestError(nil).WithMessagef("the configured scanner %s does not support scanning artifact with mime type %s", r.Name, sca.ArtifactMimeType(artifact))
 	}
 
 	var (
@@ -583,7 +583,7 @@ func (bc *basicController) GetReport(ctx context.Context, artifact *ar.Artifact,
 	}
 
 	// Get current scanner settings
-	r, err := bc.sc.GetRegistrationByProject(ctx, artifact.ProjectID)
+	r, err := bc.sc.GetRegistrationByArtifact(ctx, artifact.ProjectID, sca.ArtifactMimeType(artifact))
 	if err != nil {
 		return nil, errors.Wrap(err, "scan controller: get report")
 	}
@@ -656,7 +656,7 @@ func (bc *basicController) GetScanLog(ctx context.Context, artifact *ar.Artifact
 	if len(uuid) == 0 {
 		return nil, errors.New("empty uuid to get scan log")
 	}
-	r, err := bc.sc.GetRegistrationByProject(ctx, artifact.ProjectID)
+	r, err := bc.sc.GetRegistrationByArtifact(ctx, artifact.ProjectID, sca.ArtifactMimeType(artifact))
 	if err != nil {
 		return nil, err
 	}
@@ -931,7 +931,7 @@ func (bc *basicController) launchScanJob(ctx context.Context, param *launchScanJ
 			Repository:  param.Artifact.RepositoryName,
 			Digest:      param.Artifact.Digest,
 			Tag:         param.Tag,
-			MimeType:    param.Artifact.ManifestMediaType,
+			MimeType:    sca.ArtifactMimeType(param.Artifact),
 			Size:        param.Artifact.Size,
 		},
 		RequestType: []*v1.ScanType{

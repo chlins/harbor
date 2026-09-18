@@ -131,6 +131,22 @@ type Controller interface {
 	//     error                 : non nil error if any errors occurred
 	GetRegistrationByProject(ctx context.Context, projectID int64, options ...Option) (*scanner.Registration, error)
 
+	// GetRegistrationByArtifact returns the scanner registration to use for an artifact with the given
+	// scan mime type in the given project: the project scanner (see GetRegistrationByProject) when it has a
+	// capability for the mime type, otherwise the first enabled registration that has one, or `nil` if
+	// no registration can scan the artifact. The returned registration is always pinged so that its
+	// metadata is populated.
+	//
+	//   Arguments:
+	//     ctx context.Context : the context.Context for this method
+	//     projectID int64 : the ID of the given project
+	//     mimeType string : the scan mime type of the artifact, see scan.ArtifactMimeType
+	//
+	//   Returns:
+	//     *scanner.Registration : the scanner registration to use, or nil
+	//     error                 : non nil error if any errors occurred
+	GetRegistrationByArtifact(ctx context.Context, projectID int64, mimeType string) (*scanner.Registration, error)
+
 	// Ping pings Scanner Adapter to test EndpointURL and Authorization settings.
 	// The implementation is supposed to call the GetMetadata method on scanner.Client.
 	// Returns `nil` if connection succeeded, a non `nil` error otherwise.
