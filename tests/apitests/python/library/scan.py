@@ -9,9 +9,12 @@ class Scan(base.Base, object):
     def __init__(self):
         super(Scan,self).__init__(api_type = "scan")
 
-    def scan_artifact(self, project_name, repo_name, reference, expect_status_code = 202, expect_response_body = None, **kwargs):
+    def scan_artifact(self, project_name, repo_name, reference, expect_status_code = 202, expect_response_body = None, scan_type = None, **kwargs):
         try:
-            data, status_code, _ = self._get_client(**kwargs).scan_artifact_with_http_info(project_name, repo_name, reference)
+            req_param = {}
+            if scan_type is not None:
+                req_param["scan_type"] = scan_type
+            data, status_code, _ = self._get_client(**kwargs).scan_artifact_with_http_info(project_name, repo_name, reference, **req_param)
         except ApiException as e:
             base._assert_status_code(expect_status_code, e.status)
             if expect_response_body is not None:

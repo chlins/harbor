@@ -35,7 +35,7 @@ class Artifact(base.Base, object):
             params["with_tag"] = kwargs["with_tag"]
         if "with_scan_overview" in kwargs:
             params["with_scan_overview"] = kwargs["with_scan_overview"]
-            params["x_accept_vulnerabilities"] = ",".join(report_mime_types)
+            params["x_accept_vulnerabilities"] = kwargs.get("x_accept_vulnerabilities") or ",".join(report_mime_types)
         if "with_sbom_overview" in kwargs:
             params["with_sbom_overview"] = kwargs["with_sbom_overview"]
         if "with_immutable_status" in kwargs:
@@ -72,6 +72,16 @@ class Artifact(base.Base, object):
 
     def get_addition(self, project_name, repo_name, reference, addition, **kwargs):
         return self._get_client(**kwargs).get_addition_with_http_info(project_name, repo_name, reference, addition)
+
+    def get_vulnerabilities_addition(self, project_name, repo_name, reference, x_accept_vulnerabilities=None, **kwargs):
+        """Returns the body of the vulnerabilities addition (the vulnerability report of an image or the
+        model security report of an AI model, depending on the accepted mime types) as a string."""
+        params = {}
+        if x_accept_vulnerabilities:
+            params["x_accept_vulnerabilities"] = x_accept_vulnerabilities
+        data, status_code, _ = self._get_client(**kwargs).get_vulnerabilities_addition_with_http_info(project_name, repo_name, reference, **params)
+        base._assert_status_code(200, status_code)
+        return data
 
     def add_label_to_reference(self, project_name, repo_name, reference, label_id, expect_status_code = 200, **kwargs):
         label = v2_swagger_client.Label(id = label_id)
