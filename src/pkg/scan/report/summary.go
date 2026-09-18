@@ -197,7 +197,7 @@ func GenerateModelSecuritySummary(r *scan.Report, _ ...Option) (any, error) {
 	sum.CompletePercent = 100
 	sum.Severity = rp.Severity
 	sum.Scanner = rp.Scanner
-	sum.Summary = rp.Summary
+	sum.Summary = rp.Summary.SeveritySummary()
 
 	return sum, nil
 }

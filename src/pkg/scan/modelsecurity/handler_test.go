@@ -210,7 +210,7 @@ func (suite *HandlerTestSuite) TestGetSummary() {
 	assert.Equal(suite.T(), "ModelAudit", s.Scanner.Name)
 	// the stored report's own severity/summary are used (PostScan normalized them)
 	assert.Equal(suite.T(), vuln.Low, s.Severity)
-	assert.Equal(suite.T(), 2, s.Summary.FilesScanned)
+	assert.Equal(suite.T(), 0, s.Summary.Total)
 
 	// running scan: status only
 	running := &scan.Report{UUID: "uuid", MimeType: v1.MimeTypeModelSecurityReport, Status: job.RunningStatus.String()}

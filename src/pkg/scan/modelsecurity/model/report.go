@@ -175,22 +175,39 @@ func (r *Report) Merge(another *Report) *Report {
 }
 
 // ReportSummary is the summary of a model security report exposed as the
-// scan_overview of an artifact. It keeps the same outer shape as the vulnerability
-// NativeReportSummary (report_id, scan_status, severity, duration, ...) so API
-// consumers can render the scan status of images and models alike.
+// scan_overview of an artifact. It has the same shape as the vulnerability
+// NativeReportSummary (report_id, scan_status, severity, duration, summary with the
+// counters per severity, ...) so API consumers and the Portal render the scan status of
+// images and models alike.
 type ReportSummary struct {
-	ReportID        string        `json:"report_id"`
-	ScanStatus      string        `json:"scan_status"`
-	Severity        vuln.Severity `json:"severity"`
-	Duration        int64         `json:"duration"`
-	Summary         *Summary      `json:"summary,omitempty"`
-	StartTime       time.Time     `json:"start_time"`
-	EndTime         time.Time     `json:"end_time"`
-	Scanner         *v1.Scanner   `json:"scanner,omitempty"`
-	CompletePercent int           `json:"complete_percent"`
+	ReportID        string                     `json:"report_id"`
+	ScanStatus      string                     `json:"scan_status"`
+	Severity        vuln.Severity              `json:"severity"`
+	Duration        int64                      `json:"duration"`
+	Summary         *vuln.VulnerabilitySummary `json:"summary,omitempty"`
+	StartTime       time.Time                  `json:"start_time"`
+	EndTime         time.Time                  `json:"end_time"`
+	Scanner         *v1.Scanner                `json:"scanner,omitempty"`
+	CompletePercent int                        `json:"complete_percent"`
 
 	TotalCount    int `json:"-"`
 	CompleteCount int `json:"-"`
+}
+
+// SeveritySummary converts the counters of the report to the vulnerability summary shape.
+func (s *Summary) SeveritySummary() *vuln.VulnerabilitySummary {
+	if s == nil {
+		return nil
+	}
+	return &vuln.VulnerabilitySummary{
+		Total: s.Total,
+		Summary: vuln.SeveritySummary{
+			vuln.Critical: s.Critical,
+			vuln.High:     s.High,
+			vuln.Medium:   s.Medium,
+			vuln.Low:      s.Low,
+		},
+	}
 }
 
 // Merge merges two summaries (used for artifacts referencing several scanned artifacts).
@@ -221,9 +238,16 @@ func (sum *ReportSummary) Merge(another *ReportSummary) *ReportSummary {
 	}
 
 	if sum.Summary != nil || another.Summary != nil {
-		r.Summary = &Summary{}
-		r.Summary.Add(sum.Summary)
-		r.Summary.Add(another.Summary)
+		r.Summary = &vuln.VulnerabilitySummary{Summary: vuln.SeveritySummary{}}
+		for _, s := range []*vuln.VulnerabilitySummary{sum.Summary, another.Summary} {
+			if s == nil {
+				continue
+			}
+			r.Summary.Total += s.Total
+			for severity, count := range s.Summary {
+				r.Summary.Summary[severity] += count
+			}
+		}
 	}
 
 	return r

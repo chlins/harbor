@@ -144,7 +144,8 @@ func (suite *SummaryTestSuite) TestSummaryGenerateModelSecuritySummary() {
 	suite.Equal(vuln.Critical, ms.Severity)
 	suite.Equal(100, ms.CompletePercent)
 	suite.Equal("ModelAudit", ms.Scanner.Name)
-	suite.Equal(3, ms.Summary.FilesScanned)
+	suite.Equal(1, ms.Summary.Total)
+	suite.Equal(1, ms.Summary.Summary[vuln.Critical])
 
 	// merge two summaries
 	merged, err := MergeSummary(v1.MimeTypeModelSecurityReport, ms, ms)
