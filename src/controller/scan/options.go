@@ -14,7 +14,11 @@
 
 package scan
 
-import v1 "github.com/goharbor/harbor/src/pkg/scan/rest/v1"
+import (
+	ar "github.com/goharbor/harbor/src/controller/artifact"
+	"github.com/goharbor/harbor/src/controller/artifact/processor/cnai"
+	v1 "github.com/goharbor/harbor/src/pkg/scan/rest/v1"
+)
 
 // Options keep the settings/configurations for scanning.
 type Options struct {
@@ -27,6 +31,23 @@ type Options struct {
 // GetScanType returns the scan type. for backward compatibility, the default type is vulnerability.
 func (o *Options) GetScanType() string {
 	if len(o.ScanType) == 0 {
+		o.ScanType = v1.ScanTypeVulnerability
+	}
+	return o.ScanType
+}
+
+// resolveScanType fixes the scan type for the artifact: the security scan of a container image is
+// a vulnerability scan and the security scan of an AI model is a model-security scan, so a caller
+// that does not specify the type (scan on push, scan all, the Scan button) or asks for the security
+// scan of the other kind gets the one that applies to the artifact. The sbom type is left as is.
+func (o *Options) resolveScanType(artifact *ar.Artifact) string {
+	scanType := o.GetScanType()
+	if scanType == v1.ScanTypeSbom || artifact == nil {
+		return scanType
+	}
+	if artifact.Type == cnai.ArtifactTypeCNAI {
+		o.ScanType = v1.ScanTypeModelSecurity
+	} else {
 		o.ScanType = v1.ScanTypeVulnerability
 	}
 	return o.ScanType

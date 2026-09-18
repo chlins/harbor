@@ -37,9 +37,9 @@ func autoScan(ctx context.Context, a *artifact.Artifact, tags ...string) error {
 
 	// transaction here to work with the image index
 	return orm.WithTransaction(func(ctx context.Context) error {
-		options := []scan.Option{}
+		options := []scan.Option{scan.WithFromEvent(true)}
 		if len(tags) > 0 {
-			options = append(options, scan.WithTag(tags[0]), scan.WithFromEvent(true))
+			options = append(options, scan.WithTag(tags[0]))
 		}
 
 		return scan.DefaultController.Scan(ctx, a, options...)

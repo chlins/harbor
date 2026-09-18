@@ -165,9 +165,12 @@ func (suite *ArtifactHandlerTestSuite) TestOnPull() {
 
 func (suite *ArtifactHandlerTestSuite) TestOnDelete() {
 	evt := &event.ArtifactEvent{Artifact: &artifact.Artifact{ID: 1, RepositoryID: 1, Digest: "mock-digest", References: []*artifact.Reference{{ChildDigest: "ref-1", ChildID: 2}, {ChildDigest: "ref-2", ChildID: 3}}}}
-	suite.execMgr.On("DeleteByVendor", suite.ctx, "IMAGE_SCAN", int64(1)).Return(nil).Times(1)
-	suite.execMgr.On("DeleteByVendor", suite.ctx, "IMAGE_SCAN", int64(2)).Return(nil).Times(1)
-	suite.execMgr.On("DeleteByVendor", suite.ctx, "IMAGE_SCAN", int64(3)).Return(nil).Times(1)
+	// the scan executions of every scan vendor type are removed for the artifact and its references
+	for _, vendorType := range []string{"IMAGE_SCAN", "SBOM", "MODEL_SCAN"} {
+		suite.execMgr.On("DeleteByVendor", suite.ctx, vendorType, int64(1)).Return(nil).Times(1)
+		suite.execMgr.On("DeleteByVendor", suite.ctx, vendorType, int64(2)).Return(nil).Times(1)
+		suite.execMgr.On("DeleteByVendor", suite.ctx, vendorType, int64(3)).Return(nil).Times(1)
+	}
 	suite.artMgr.On("Count", suite.ctx, mock.Anything).Return(int64(0), nil).Times(3)
 	suite.reportMgr.On("DeleteByDigests", suite.ctx, "mock-digest", "ref-1", "ref-2").Return(nil).Times(1)
 	err := suite.handler.onDelete(suite.ctx, evt)
