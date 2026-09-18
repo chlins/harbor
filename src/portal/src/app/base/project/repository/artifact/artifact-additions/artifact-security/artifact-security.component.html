@@ -25,9 +25,7 @@
                             } @if (isRunningState()) {
                             <clr-icon shape="stop" size="16"></clr-icon>
                             } &nbsp; @if (!isRunningState()) {
-                            <span>{{
-                                'VULNERABILITY.SCAN_NOW' | translate
-                            }}</span>
+                            <span>{{ 'SECURITY.SCAN_NOW' | translate }}</span>
                             } @if (isRunningState()) {
                             <span>{{
                                 'VULNERABILITY.STOP_NOW' | translate
