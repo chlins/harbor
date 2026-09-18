@@ -47,7 +47,7 @@ API and produces the model security report can be plugged in (e.g. protectai/mod
 4. Generate **CycloneDX SBOMs for models** and store them as `sbom.harbor` accessories,
    downloadable from the artifact page.
 5. Ship **`harbor-scanner-modelaudit`** (Python, own repository) as the reference
-   adapter, with an installer option to deploy it.
+   adapter. It is deployed out of tree and registered like any other scanner.
 6. Render findings and the SBOM in the Portal on the model artifact page, with the
    scan summary in the artifact list.
 
@@ -243,8 +243,10 @@ Image: `goharbor/harbor-scanner-modelaudit`, Python 3.12 slim, `modelaudit[all]`
 TensorFlow/Torch extras by default (they are only needed for deep inspection of a few
 formats and add gigabytes), with a `-full` variant.
 
-Harbor installer: `./install.sh --with-modelaudit` deploys the adapter and registers it
-as an enabled, immutable scanner named `ModelAudit`, mirroring `--with-trivy`.
+Deployment: the adapter is run out of tree (its own container / Helm values) and
+registered once through Administration → Interrogation Services → Scanners, or the
+`/scanners` API. Bundling it in the Harbor installer (`--with-modelaudit`) is deferred
+until the adapter has matured; nothing in Harbor depends on the adapter being in tree.
 
 ### 7. Portal
 
@@ -336,7 +338,7 @@ today).
 6. Event handlers: verify scan-on-push / auto SBOM for CNAI; project settings wording.
 7. Portal: Security tab, SBOM tab for models, artifact list summary, scanner list
    artifact types.
-8. Installer: `--with-modelaudit`, compose template, auto registration.
+8. Installer integration: deferred, the adapter stays out of tree for now.
 9. Tests: unit (handlers, checker, converters), API test with a fake adapter, robot
    case with the real adapter.
 10. Docs.
