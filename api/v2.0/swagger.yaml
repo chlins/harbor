@@ -9490,9 +9490,9 @@ definitions:
         example: "healthy"
       capabilities:
         type: object
-        description: Indicates the capabilities of the scanner, e.g. support_vulnerability or support_sbom.
+        description: Indicates the capabilities of the scanner, e.g. support_vulnerability, support_sbom or support_model_security.
         additionalProperties: True
-        example:  {"support_vulnerability": true, "support_sbom": true}
+        example:  {"support_vulnerability": true, "support_sbom": true, "support_model_security": false}
 
   ScannerRegistrationReq:
     type: object
