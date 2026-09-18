@@ -19,10 +19,12 @@ import (
 	"slices"
 
 	"github.com/goharbor/harbor/src/controller/artifact"
+	"github.com/goharbor/harbor/src/controller/artifact/processor/cnai"
 	"github.com/goharbor/harbor/src/controller/artifact/processor/image"
 	"github.com/goharbor/harbor/src/controller/scanner"
 	"github.com/goharbor/harbor/src/lib/q"
 	"github.com/goharbor/harbor/src/pkg/accessory"
+	sca "github.com/goharbor/harbor/src/pkg/scan"
 	models "github.com/goharbor/harbor/src/pkg/scan/dao/scanner"
 )
 
@@ -38,15 +40,20 @@ func NewChecker() Checker {
 		artifactCtl:   artifact.Ctl,
 		accMgr:        accessory.Mgr,
 		scannerCtl:    scanner.DefaultController,
-		registrations: map[int64]*models.Registration{},
+		registrations: map[scannerCacheKey]*models.Registration{},
 	}
+}
+
+type scannerCacheKey struct {
+	projectID int64
+	mimeType  string
 }
 
 type checker struct {
 	artifactCtl   artifact.Controller
 	accMgr        accessory.Manager
 	scannerCtl    scanner.Controller
-	registrations map[int64]*models.Registration
+	registrations map[scannerCacheKey]*models.Registration
 }
 
 func (c *checker) IsScannable(ctx context.Context, art *artifact.Artifact) (bool, error) {
@@ -54,11 +61,14 @@ func (c *checker) IsScannable(ctx context.Context, art *artifact.Artifact) (bool
 	// 1. The scanner has capability for the artifact directly, eg the artifact is docker image.
 	// 2. The artifact is image index and the scanner has capability for any artifact which is referenced by the artifact.
 
-	projectID := art.ProjectID
+	// The scanner is resolved per project and per artifact kind (image / model) because the project
+	// scanner may not be able to scan every kind, see scanner.Controller.GetRegistrationByArtifact.
+	mimeType := sca.ArtifactMimeType(art)
+	key := scannerCacheKey{projectID: art.ProjectID, mimeType: mimeType}
 
-	r, ok := c.registrations[projectID]
+	r, ok := c.registrations[key]
 	if !ok {
-		registration, err := c.scannerCtl.GetRegistrationByProject(ctx, projectID)
+		registration, err := c.scannerCtl.GetRegistrationByArtifact(ctx, art.ProjectID, mimeType)
 		if err != nil {
 			return false, err
 		}
@@ -68,7 +78,7 @@ func (c *checker) IsScannable(ctx context.Context, art *artifact.Artifact) (bool
 		}
 
 		r = registration
-		c.registrations[projectID] = registration
+		c.registrations[key] = registration
 	}
 
 	var scannable bool
@@ -123,11 +133,12 @@ func (c *checker) isAccessory(ctx context.Context, art *artifact.Artifact) (bool
 // hasCapability returns true when scanner has capability for the artifact
 // See https://github.com/goharbor/pluggable-scanner-spec/issues/2 to get more info
 func hasCapability(r *models.Registration, a *artifact.Artifact) bool {
-	// use allowlist here because currently only docker image is supported by the scanner
+	// use allowlist here because only docker/OCI images and CNCF models are supported by the scanners,
+	// other artifact types (charts, WASM, ...) are never scannable
 	// https://github.com/goharbor/pluggable-scanner-spec/issues/2
-	allowlist := []string{image.ArtifactTypeImage}
+	allowlist := []string{image.ArtifactTypeImage, cnai.ArtifactTypeCNAI}
 	if slices.Contains(allowlist, a.Type) {
-		return r.HasCapability(a.ManifestMediaType)
+		return r.HasCapability(sca.ArtifactMimeType(a))
 	}
 
 	return false

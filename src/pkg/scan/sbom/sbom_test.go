@@ -231,7 +231,7 @@ func (suite *SBOMTestSuite) TestGetSBOMSummary() {
 	rpts := []*sbomModel.Report{
 		{UUID: "rp-uuid-004", MimeType: v1.MimeTypeSBOMReport, ReportSummary: `{"scan_status":"Success", "sbom_digest": "sha256:1234567890"}`},
 	}
-	mock.OnAnything(suite.scannerController, "GetRegistrationByProject").Return(r, nil)
+	mock.OnAnything(suite.scannerController, "GetRegistrationByArtifact").Return(r, nil)
 	mock.OnAnything(suite.sbomManager, "GetBy").Return(rpts, nil)
 	sum, err := suite.handler.GetSummary(context.TODO(), suite.artifact, []string{v1.MimeTypeSBOMReport})
 	suite.Nil(err)

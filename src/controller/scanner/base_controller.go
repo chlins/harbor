@@ -18,6 +18,7 @@ import (
 	"context"
 	"fmt"
 	"slices"
+	"sort"
 	"sync"
 	"time"
 
@@ -300,6 +301,50 @@ func (bc *basicController) GetRegistrationByProject(ctx context.Context, project
 	}
 
 	return registration, nil
+}
+
+// GetRegistrationByArtifact ...
+func (bc *basicController) GetRegistrationByArtifact(ctx context.Context, projectID int64, mimeType string) (*scanner.Registration, error) {
+	r, err := bc.GetRegistrationByProject(ctx, projectID, WithPing(true))
+	if err != nil {
+		return nil, err
+	}
+	if r != nil && (r.HasCapability(mimeType) || r.Health != StatusHealthy) {
+		// keep the project scanner when it is capable, or when it cannot be asked (unhealthy):
+		// the callers treat an unhealthy scanner as "not scannable" without failing hard
+		return r, nil
+	}
+
+	// fall back to the first enabled registration with a capability for the mime type
+	regs, err := bc.manager.List(ctx, q.New(q.KeyWords{"disabled": false}))
+	if err != nil {
+		return nil, errors.Wrap(err, "api controller: get scanner by artifact")
+	}
+	sort.SliceStable(regs, func(i, j int) bool {
+		return regs[i].CreateTime.Before(regs[j].CreateTime)
+	})
+	for _, candidate := range regs {
+		if r != nil && candidate.UUID == r.UUID {
+			continue
+		}
+		meta, err := bc.Ping(ctx, candidate)
+		if err != nil {
+			log.Debugf("skip scanner %s for mime type %s: %v", candidate.Name, mimeType, err)
+			continue
+		}
+		if !meta.HasCapability(mimeType) {
+			continue
+		}
+		candidate.Health = StatusHealthy
+		candidate.Adapter = meta.Scanner.Name
+		candidate.Vendor = meta.Scanner.Vendor
+		candidate.Version = meta.Scanner.Version
+		candidate.Metadata = meta
+		return candidate, nil
+	}
+
+	// nothing better, return the project scanner (possibly nil) so callers report the usual error
+	return r, nil
 }
 
 // Ping ...
