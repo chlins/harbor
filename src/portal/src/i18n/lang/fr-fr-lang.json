@@ -288,11 +288,11 @@
         "PREVENT_VULNERABLE_1": "Empêcher les images présentant une vulnérabilité grave de",
         "PREVENT_VULNERABLE_2": "et au-dessus d'être déployées.",
         "SCAN": "Analyse des vulnérabilités",
-        "AUTOSCAN_TOGGLE": "Analyse automatique des images lors de l'envoi",
-        "AUTOSCAN_POLICY": "Analyser automatiquement les images lorsqu'elles sont envoyées au projet du registre.",
+        "AUTOSCAN_TOGGLE": "Analyse automatique des artefacts lors de l'envoi",
+        "AUTOSCAN_POLICY": "Analyser automatiquement les images et les modèles d'IA lorsqu'ils sont envoyés au registre du projet.",
         "SBOM": "Génération de SBOM",
         "AUTOSBOM_TOGGLE": "Générer automatiquement un SBOM au push",
-        "AUTOSBOM_POLICY": "Générer automatiquement un SBOM lorsque les images sont poussées sur le registre.",
+        "AUTOSBOM_POLICY": "Générer automatiquement un SBOM lorsque les images et les modèles d'IA sont poussés sur le registre.",
         "CONTENT_TRUST_POLICY": "Autoriser uniquement le déploiement d'images vérifiées."
     },
     "MEMBER": {
@@ -813,6 +813,7 @@
         "SIZE": "Taille",
         "VULNERABILITY": "Vulnérabilité",
         "SBOM": "SBOM",
+        "SECURITY": "Sécurité",
         "BUILD_HISTORY": "Historique de construction",
         "SIGNED": "Signé",
         "AUTHOR": "Auteur",
@@ -1486,6 +1487,20 @@
         "EXISTING_RULE": "Règle existante",
         "ACTION": "Action"
     },
+    "SECURITY": {
+        "SEVERITY": "Sévérité :",
+        "NO_FINDINGS": "Aucun problème de sécurité",
+        "FILES_SCANNED": "Fichiers analysés",
+        "CHECKS": "Contrôles",
+        "GRID": {
+            "COLUMN_ID": "Constat",
+            "COLUMN_FILE": "Fichier",
+            "COLUMN_MESSAGE": "Message",
+            "COLUMN_CHECK": "Contrôle",
+            "COLUMN_WHY": "Raison",
+            "COLUMN_DETAILS": "Détails"
+        }
+    },
     "SCANNER": {
         "DELETION_SUMMARY": "Voulez-vous supprimer le scanneur {{param}} ?",
         "SKIP_CERT_VERIFY": "Cocher cette case si le registre distant utilise un certificat auto-signé.",
@@ -1495,6 +1510,7 @@
         "NAME_REX": "Le nom doit comporter au moins 2 caractères avec des minuscules, des chiffres et. _- et doit commencer par des caractères ou des chiffres.",
         "DESCRIPTION": "Description",
         "SBOM": "SBOM",
+        "MODEL_SECURITY": "Sécurité du modèle",
         "VULNERABILITY": "Vulnérabilité",
         "SUPPORTED": "Supporté",
         "NOT_SUPPORTED": "Non Supporté",

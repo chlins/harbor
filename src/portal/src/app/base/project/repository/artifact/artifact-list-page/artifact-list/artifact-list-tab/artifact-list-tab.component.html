@@ -25,7 +25,7 @@
                                 canScanNow() &&
                                 selectedRowHasVul() &&
                                 hasEnabledScanner &&
-                                hasScannerSupportVulnerability &&
+                                selectedRowScanSupported() &&
                                 hasScanImagePermission
                             )
                         "
@@ -457,6 +457,7 @@
                         <hbr-vulnerability-bar
                             (submitStopFinish)="submitStopFinish($event)"
                             (scanFinished)="scanFinished($event)"
+                            [isModel]="isModel(artifact)"
                             [inputScanner]="
                                 handleScanOverview(artifact.scan_overview)
                                     ?.scanner

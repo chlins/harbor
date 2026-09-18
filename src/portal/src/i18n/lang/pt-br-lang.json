@@ -287,11 +287,11 @@
         "PREVENT_VULNERABLE_1": "Prevenir imagens com vulnerabilidades de severidade",
         "PREVENT_VULNERABLE_2": "e acima de serem utilizadas.",
         "SCAN": "Análise de vulnerabilidades",
-        "AUTOSCAN_TOGGLE": "Verificar imagens automaticamente",
-        "AUTOSCAN_POLICY": "Imagens serão analisadas automaticamente quando enviadas ao repositório do projeto.",
+        "AUTOSCAN_TOGGLE": "Verificar artefatos automaticamente",
+        "AUTOSCAN_POLICY": "Imagens e modelos de IA serão analisados automaticamente quando enviados ao repositório do projeto.",
         "SBOM": "SBOM generation",
         "AUTOSBOM_TOGGLE": "Gerar SBOM automaticamente ao enviar",
-        "AUTOSBOM_POLICY": "Gerar SBOM automaticamente quando as imagens são enviadas ao repositório do projeto.",
+        "AUTOSBOM_POLICY": "Gerar SBOM automaticamente quando imagens e modelos de IA são enviados ao repositório do projeto.",
         "CONTENT_TRUST_POLICY": "Permitir implantação apenas de imagens verificadas."
     },
     "MEMBER": {
@@ -815,6 +815,7 @@
         "SIZE": "Tamanho",
         "VULNERABILITY": "Vulnerabilidade",
         "SBOM": "SBOM",
+        "SECURITY": "Segurança",
         "SIGNED": "Assinada",
         "AUTHOR": "Autor",
         "CREATED": "Data de criação",
@@ -1493,6 +1494,20 @@
         "EXISTING_RULE": "Regra existente",
         "ACTION": "AÇÃO"
     },
+    "SECURITY": {
+        "SEVERITY": "Severidade:",
+        "NO_FINDINGS": "Nenhum problema de segurança",
+        "FILES_SCANNED": "Arquivos verificados",
+        "CHECKS": "Verificações",
+        "GRID": {
+            "COLUMN_ID": "Problema",
+            "COLUMN_FILE": "Arquivo",
+            "COLUMN_MESSAGE": "Mensagem",
+            "COLUMN_CHECK": "Verificação",
+            "COLUMN_WHY": "Motivo",
+            "COLUMN_DETAILS": "Detalhes"
+        }
+    },
     "SCANNER": {
         "DELETION_SUMMARY": "Deseja remover o examinador {{param}}?",
         "SKIP_CERT_VERIFY": "Marque para ignorar certificados inválidos ou auto-assinados no repositório remoto (registry).",
@@ -1502,6 +1517,7 @@
         "NAME_REX": "O nome precisa ter no mínimo 2 caracteres. Pode conter apenas letras minúsculas, numeros, ou símbolos ._- e deve começar por uma letra ou número.",
         "DESCRIPTION": "Descrição",
         "SBOM": "SBOM",
+        "MODEL_SECURITY": "Segurança do modelo",
         "VULNERABILITY": "Vulnerability",
         "SUPPORTED": "Supported",
         "NOT_SUPPORTED": "Not Supported",

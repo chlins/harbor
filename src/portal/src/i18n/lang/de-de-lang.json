@@ -287,11 +287,11 @@
         "PREVENT_VULNERABLE_1": "Verhindere den Download von Images mit Schwachstellen des Schweregrads ",
         "PREVENT_VULNERABLE_2": "und darüber.",
         "SCAN": "Scannen auf Schwachstellen",
-        "AUTOSCAN_TOGGLE": "Images automatisch beim Hochladen scannen",
-        "AUTOSCAN_POLICY": "Scanne Images automatisch, wenn sie in das Projekt hochgeladen werden.",
+        "AUTOSCAN_TOGGLE": "Artefakte automatisch beim Hochladen scannen",
+        "AUTOSCAN_POLICY": "Scanne Images und KI-Modelle automatisch, wenn sie in das Projekt hochgeladen werden.",
         "SBOM": "SBOM generation",
         "AUTOSBOM_TOGGLE": "SBOM automatisch beim Hochladen generieren",
-        "AUTOSBOM_POLICY": "Automatisch SBOM generieren, wenn Bilder in die Projektregistrierung hochgeladen werden.",
+        "AUTOSBOM_POLICY": "Automatisch SBOM generieren, wenn Images und KI-Modelle in die Projektregistrierung hochgeladen werden.",
         "CONTENT_TRUST_POLICY": "Erlaube ausschließlich verifizierte Images."
     },
     "MEMBER": {
@@ -811,6 +811,7 @@
         "SIZE": "Größe",
         "VULNERABILITY": "Schwachstellen",
         "SBOM": "SBOM",
+        "SECURITY": "Sicherheit",
         "BUILD_HISTORY": "Build History",
         "SIGNED": "Signiert",
         "AUTHOR": "Autor",
@@ -1484,6 +1485,20 @@
         "EXISTING_RULE": "Existierende Regel",
         "ACTION": "AKTION"
     },
+    "SECURITY": {
+        "SEVERITY": "Schweregrad:",
+        "NO_FINDINGS": "Keine Sicherheitsbefunde",
+        "FILES_SCANNED": "Gescannte Dateien",
+        "CHECKS": "Prüfungen",
+        "GRID": {
+            "COLUMN_ID": "Befund",
+            "COLUMN_FILE": "Datei",
+            "COLUMN_MESSAGE": "Meldung",
+            "COLUMN_CHECK": "Prüfung",
+            "COLUMN_WHY": "Grund",
+            "COLUMN_DETAILS": "Details"
+        }
+    },
     "SCANNER": {
         "DELETION_SUMMARY": "Soll der Scanner {{param}} gelöscht werden?",
         "SKIP_CERT_VERIFY": "Aktiviere die Checkbox, falls die Remote-Registry ein selbsigniertes oder nicht-vertrauenswürdiges Zertifikat verwendet.",
@@ -1493,6 +1508,7 @@
         "NAME_REX": "Der Name muss mindestens 2 Zeichen lang sein. Mit Kleinbuchstaben, Ziffern und ._-. Er muss mit Buchstaben oder Ziffern beginnen.",
         "DESCRIPTION": "Beschreibung",
         "SBOM": "SBOM",
+        "MODEL_SECURITY": "Modellsicherheit",
         "VULNERABILITY": "Vulnerability",
         "SUPPORTED": "Supported",
         "NOT_SUPPORTED": "Not Supported",

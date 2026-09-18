@@ -287,11 +287,11 @@
         "PREVENT_VULNERABLE_1": "Prevent images with vulnerability severity of",
         "PREVENT_VULNERABLE_2": "and above from being deployed.",
         "SCAN": "Vulnerability scanning",
-        "AUTOSCAN_TOGGLE": "Automatically scan images on push",
-        "AUTOSCAN_POLICY": "Automatically scan images when they are pushed to the project registry.",
+        "AUTOSCAN_TOGGLE": "Automatically scan artifacts on push",
+        "AUTOSCAN_POLICY": "Automatically scan images and AI models when they are pushed to the project registry.",
         "SBOM": "SBOM generation",
         "AUTOSBOM_TOGGLE": "Automatically generate SBOM on push",
-        "AUTOSBOM_POLICY": "Automatically generate SBOM when the images are pushed to the project registry.",
+        "AUTOSBOM_POLICY": "Automatically generate SBOM when images and AI models are pushed to the project registry.",
         "CONTENT_TRUST_POLICY": "Allow only verified images to be deployed."
     },
     "MEMBER": {
@@ -811,6 +811,7 @@
         "SIZE": "Size",
         "VULNERABILITY": "Vulnerabilities",
         "SBOM": "SBOM",
+        "SECURITY": "Security",
         "BUILD_HISTORY": "Build History",
         "SIGNED": "Signed",
         "AUTHOR": "Author",
@@ -1484,6 +1485,20 @@
         "EXISTING_RULE": "Existing rule",
         "ACTION": "ACTION"
     },
+    "SECURITY": {
+        "SEVERITY": "Severity:",
+        "NO_FINDINGS": "No security finding",
+        "FILES_SCANNED": "Files scanned",
+        "CHECKS": "Checks",
+        "GRID": {
+            "COLUMN_ID": "Finding",
+            "COLUMN_FILE": "File",
+            "COLUMN_MESSAGE": "Message",
+            "COLUMN_CHECK": "Check",
+            "COLUMN_WHY": "Why",
+            "COLUMN_DETAILS": "Details"
+        }
+    },
     "SCANNER": {
         "DELETION_SUMMARY": "Do you want to delete scanner {{param}}?",
         "SKIP_CERT_VERIFY": "Check this box to skip certificate verification when the remote registry uses a self-signed or untrusted certificate.",
@@ -1493,6 +1508,7 @@
         "NAME_REX": "Name should be at least 2 characters long with lower case characters, numbers and ._- and must start with characters or numbers.",
         "DESCRIPTION": "Description",
         "SBOM": "SBOM",
+        "MODEL_SECURITY": "Model Security",
         "VULNERABILITY": "Vulnerability",
         "SUPPORTED": "Supported",
         "NOT_SUPPORTED": "Not Supported",

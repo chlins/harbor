@@ -264,7 +264,12 @@ export const DEFAULT_PAGE_SIZE: number = 15;
  *  The default supported mime type
  */
 export const DEFAULT_SUPPORTED_MIME_TYPES =
-    'application/vnd.security.vulnerability.report; version=1.1, application/vnd.scanner.adapter.vuln.report.harbor+json; version=1.0';
+    'application/vnd.security.vulnerability.report; version=1.1, application/vnd.scanner.adapter.vuln.report.harbor+json; version=1.0, application/vnd.security.model.report+json; version=1.0';
+/**
+ *  The mime type of the model security report (AI model artifacts)
+ */
+export const MODEL_SECURITY_REPORT_MIME_TYPE =
+    'application/vnd.security.model.report+json; version=1.0';
 /**
  *  The default supported mime type for SBOM
  */
@@ -275,7 +280,7 @@ export const DEFAULT_SBOM_SUPPORTED_MIME_TYPES =
  */
 export const SBOM_SUPPORTED_ADDITIONAL_MIME_TYPES = [
     'application/spdx+json',
-    // 'application/vnd.cyclonedx+json', // feature release
+    'application/vnd.cyclonedx+json',
 ];
 
 /**
@@ -1094,6 +1099,7 @@ export enum PageSizeMapKeys {
     ARTIFACT_TAGS_COMPONENT = 'ArtifactTagComponent',
     ARTIFACT_VUL_COMPONENT = 'ArtifactVulnerabilitiesComponent',
     ARTIFACT_SBOM_COMPONENT = 'ArtifactSbomComponent',
+    ARTIFACT_SECURITY_COMPONENT = 'ArtifactSecurityComponent',
     MEMBER_COMPONENT = 'MemberComponent',
     LABEL_COMPONENT = 'LabelComponent',
     P2P_POLICY_COMPONENT = 'P2pPolicyComponent',

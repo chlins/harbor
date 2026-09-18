@@ -287,10 +287,10 @@
         "PREVENT_VULNERABLE_1": "Prevent images with vulnerability severity of",
         "PREVENT_VULNERABLE_2": "and above from being deployed.",
         "SCAN": "취약점 스캔",
-        "AUTOSCAN_TOGGLE": "푸시 시 이미지 자동 스캔",
-        "AUTOSCAN_POLICY": "이미지가 프로젝트 레지스트리에 푸시되면 자동으로 이미지를 스캔합니다.",
+        "AUTOSCAN_TOGGLE": "푸시 시 아티팩트 자동 스캔",
+        "AUTOSCAN_POLICY": "이미지와 AI 모델이 프로젝트 레지스트리에 푸시되면 자동으로 스캔합니다.",
         "AUTOSBOM_TOGGLE": "푸시 시 SBOM 자동 생성",
-        "AUTOSBOM_POLICY": "이미지가 프로젝트 레지스트리에 푸시되면 자동으로 SBOM을 생성합니다.",
+        "AUTOSBOM_POLICY": "이미지와 AI 모델이 프로젝트 레지스트리에 푸시되면 자동으로 SBOM을 생성합니다.",
         "CONTENT_TRUST_POLICY": "확인된 이미지만 배포되도록 허용합니다.",
         "SBOM": "SBOM 생성"
     },
@@ -811,6 +811,7 @@
         "SIZE": "크기",
         "VULNERABILITY": "취약점",
         "SBOM": "SBOM",
+        "SECURITY": "보안",
         "BUILD_HISTORY": "기록 생성",
         "SIGNED": "서명됨",
         "AUTHOR": "작성자",
@@ -1484,6 +1485,20 @@
         "EXISTING_RULE": "Existing rule",
         "ACTION": "ACTION"
     },
+    "SECURITY": {
+        "SEVERITY": "심각도:",
+        "NO_FINDINGS": "보안 문제 없음",
+        "FILES_SCANNED": "스캔한 파일",
+        "CHECKS": "검사",
+        "GRID": {
+            "COLUMN_ID": "문제",
+            "COLUMN_FILE": "파일",
+            "COLUMN_MESSAGE": "메시지",
+            "COLUMN_CHECK": "검사",
+            "COLUMN_WHY": "이유",
+            "COLUMN_DETAILS": "세부 정보"
+        }
+    },
     "SCANNER": {
         "DELETION_SUMMARY": "스캐너 {{param}}을 삭제하시겠습니까?",
         "SKIP_CERT_VERIFY": "원격 레지스트리가 자체 서명되거나 신뢰할 수 없는 인증서를 사용할 때 인증서 확인을 건너뛰려면 이 상자를 선택하십시오.",
@@ -1536,6 +1551,7 @@
         "SCANNERS": "스캐너들",
         "SCANNER": "스캐너",
         "SBOM": "SBOM",
+        "MODEL_SECURITY": "모델 보안",
         "VULNERABILITY": "취약점",
         "SUPPORTED": "지원됨",
         "NOT_SUPPORTED": "지원되지 않음",

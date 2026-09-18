@@ -142,6 +142,9 @@
             <clr-dg-column class="width-120">{{
                 'SCANNER.SBOM' | translate
             }}</clr-dg-column>
+            <clr-dg-column class="width-120">{{
+                'SCANNER.MODEL_SECURITY' | translate
+            }}</clr-dg-column>
             <clr-dg-column>{{
                 'SCANNER.DESCRIPTION' | translate
             }}</clr-dg-column>
@@ -207,6 +210,12 @@
                 }}</clr-dg-cell>
                 <clr-dg-cell>{{
                     (supportCapability(scanner, 'sbom')
+                        ? 'SCANNER.SUPPORTED'
+                        : 'SCANNER.NOT_SUPPORTED'
+                    ) | translate
+                }}</clr-dg-cell>
+                <clr-dg-cell>{{
+                    (supportCapability(scanner, 'model_security')
                         ? 'SCANNER.SUPPORTED'
                         : 'SCANNER.NOT_SUPPORTED'
                     ) | translate

@@ -28,6 +28,7 @@ export class ArtifactListPageService {
     private _hasEnabledScanner: boolean = false;
     private _hasScannerSupportVulnerability: boolean = false;
     private _hasScannerSupportSBOM: boolean = false;
+    private _hasScannerSupportModelSecurity: boolean = false;
     private _hasAddLabelImagePermission: boolean = false;
     private _hasRetagImagePermission: boolean = false;
     private _hasDeleteImagePermission: boolean = false;
@@ -85,6 +86,10 @@ export class ArtifactListPageService {
         return this._hasScannerSupportSBOM;
     }
 
+    hasScannerSupportModelSecurity(): boolean {
+        return this._hasScannerSupportModelSecurity;
+    }
+
     init(projectId: number) {
         this._getProjectScanner(projectId);
         this._getPermissionRule(projectId);
@@ -112,6 +117,10 @@ export class ArtifactListPageService {
             }
             if (capabilities?.support_sbom !== undefined) {
                 this._hasScannerSupportSBOM = capabilities.support_sbom;
+            }
+            if (capabilities?.support_model_security !== undefined) {
+                this._hasScannerSupportModelSecurity =
+                    capabilities.support_model_security;
             }
         }
     }

@@ -287,11 +287,11 @@
         "PREVENT_VULNERABLE_1": "阻止危害级别",
         "PREVENT_VULNERABLE_2": "以上的镜像运行。",
         "SCAN": "漏洞扫描",
-        "AUTOSCAN_TOGGLE": "自动扫描镜像",
-        "AUTOSCAN_POLICY": "当镜像上传后，自动进行扫描",
+        "AUTOSCAN_TOGGLE": "推送时自动扫描制品",
+        "AUTOSCAN_POLICY": "当镜像或 AI 模型推送到项目仓库时自动进行扫描。",
         "SBOM": "生成软件物料清单",
         "AUTOSBOM_TOGGLE": "推送时自动生成 SBOM",
-        "AUTOSBOM_POLICY": "当镜像推送到项目仓库时自动生成 SBOM。",
+        "AUTOSBOM_POLICY": "当镜像或 AI 模型推送到项目仓库时自动生成 SBOM。",
         "CONTENT_TRUST_POLICY": "仅允许部署经过验证的镜像。"
     },
     "MEMBER": {
@@ -813,6 +813,7 @@
         "SIZE": "大小",
         "VULNERABILITY": "漏洞",
         "SBOM": "软件物料清单",
+        "SECURITY": "安全",
         "BUILD_HISTORY": "构建历史",
         "SIGNED": "已签名",
         "AUTHOR": "作者",
@@ -1486,6 +1487,20 @@
         "EXISTING_RULE": "规则已存在。",
         "ACTION": "操作"
     },
+    "SECURITY": {
+        "SEVERITY": "严重程度：",
+        "NO_FINDINGS": "未发现安全问题",
+        "FILES_SCANNED": "已扫描文件",
+        "CHECKS": "检查项",
+        "GRID": {
+            "COLUMN_ID": "问题",
+            "COLUMN_FILE": "文件",
+            "COLUMN_MESSAGE": "描述",
+            "COLUMN_CHECK": "检查",
+            "COLUMN_WHY": "原因",
+            "COLUMN_DETAILS": "详情"
+        }
+    },
     "SCANNER": {
         "DELETION_SUMMARY": "确定删除扫描器{{param}}？",
         "SKIP_CERT_VERIFY": "当远端服务使用自签或不可信证书时可勾选此项以跳过证书认证。",
@@ -1495,6 +1510,7 @@
         "NAME_REX": "名称由小写字符、数字和._-组成且至少2个字符并以字符或者数字开头。",
         "DESCRIPTION": "描述",
         "SBOM": "软件物料清单",
+        "MODEL_SECURITY": "模型安全",
         "VULNERABILITY": "漏洞扫描",
         "SUPPORTED": "支持",
         "NOT_SUPPORTED": "不支持",

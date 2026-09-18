@@ -1,0 +1,192 @@
+<div class="row result-row">
+    <div>
+        <div class="row flex-items-xs-right rightPos">
+            <div class="flex-xs-middle option-right">
+                <span class="refresh-btn" (click)="refresh()"
+                    ><clr-icon shape="refresh"></clr-icon
+                ></span>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <clr-datagrid [clrDgLoading]="loading" (clrDgRefresh)="load($event)">
+            <clr-dg-action-bar>
+                <div class="clr-row center">
+                    <div class="ml-05">
+                        <button
+                            id="scan-btn"
+                            (click)="scanOrStop()"
+                            type="button"
+                            class="btn btn-secondary"
+                            [clrLoading]="scanBtnState"
+                            [disabled]="!canScan()">
+                            @if (!isRunningState()) {
+                            <clr-icon shape="shield-check" size="16"></clr-icon>
+                            } @if (isRunningState()) {
+                            <clr-icon shape="stop" size="16"></clr-icon>
+                            } &nbsp; @if (!isRunningState()) {
+                            <span>{{
+                                'VULNERABILITY.SCAN_NOW' | translate
+                            }}</span>
+                            } @if (isRunningState()) {
+                            <span>{{
+                                'VULNERABILITY.STOP_NOW' | translate
+                            }}</span>
+                            }
+                        </button>
+                    </div>
+                    <div class="ml-1">
+                        <div [hidden]="!shouldShowBar()">
+                            <hbr-vulnerability-bar
+                                (submitStopFinish)="submitStopFinish($event)"
+                                [isModel]="true"
+                                [summary]="
+                                    handleScanOverview(artifact?.scan_overview)
+                                "
+                                [inputScanner]="scanner"
+                                (submitFinish)="submitFinish($event)"
+                                [projectName]="projectName"
+                                [repoName]="repoName"
+                                [artifactDigest]="digest">
+                            </hbr-vulnerability-bar>
+                        </div>
+                    </div>
+                    @if (report?.summary) {
+                    <div class="ml-1">
+                        <span class="summary-item"
+                            >{{ 'SECURITY.FILES_SCANNED' | translate }}:
+                            {{ report.summary.files_scanned }}</span
+                        >
+                        @if (report.summary.scanners?.length) {
+                        <span class="summary-item"
+                            >{{ 'SECURITY.CHECKS' | translate }}:
+                            {{ report.summary.scanners.join(', ') }}</span
+                        >
+                        }
+                    </div>
+                    }
+                </div>
+            </clr-dg-action-bar>
+            <clr-dg-column [clrDgField]="'id'">{{
+                'SECURITY.GRID.COLUMN_ID' | translate
+            }}</clr-dg-column>
+            <clr-dg-column [clrDgSortBy]="severitySort">{{
+                'VULNERABILITY.GRID.COLUMN_SEVERITY' | translate
+            }}</clr-dg-column>
+            <clr-dg-column [clrDgField]="'file'">{{
+                'SECURITY.GRID.COLUMN_FILE' | translate
+            }}</clr-dg-column>
+            <clr-dg-column [clrDgField]="'message'">{{
+                'SECURITY.GRID.COLUMN_MESSAGE' | translate
+            }}</clr-dg-column>
+            <clr-dg-column [clrDgField]="'scanner'">{{
+                'SECURITY.GRID.COLUMN_CHECK' | translate
+            }}</clr-dg-column>
+            <clr-dg-placeholder>
+                @if (hasScanned()) {
+                <span>{{
+                    'VULNERABILITY.STATE.OTHER_STATUS' | translate
+                }}</span>
+                } @else {
+                {{ 'SECURITY.NO_FINDINGS' | translate }}
+                }
+            </clr-dg-placeholder>
+            <clr-dg-row *clrDgItems="let res of findings">
+                <clr-dg-cell>
+                    @if (!res.links || res.links.length === 0) {
+                    <span>{{ res.id }}</span>
+                    } @if (res.links && res.links.length >= 1) {
+                    <a
+                        rel="noopener noreferrer"
+                        href="{{ res.links[0] }}"
+                        target="_blank"
+                        >{{ res.id }}</a
+                    >
+                    }
+                </clr-dg-cell>
+                <clr-dg-cell [ngSwitch]="res.severity">
+                    <span
+                        *ngSwitchCase="'Critical'"
+                        class="label label-critical no-border"
+                        >{{ severityText(res.severity) | translate }}</span
+                    >
+                    <span
+                        *ngSwitchCase="'High'"
+                        class="label label-danger no-border"
+                        >{{ severityText(res.severity) | translate }}</span
+                    >
+                    <span
+                        *ngSwitchCase="'Medium'"
+                        class="label label-medium no-border"
+                        >{{ severityText(res.severity) | translate }}</span
+                    >
+                    <span
+                        *ngSwitchCase="'Low'"
+                        class="label label-low no-border"
+                        >{{ severityText(res.severity) | translate }}</span
+                    >
+                    <span *ngSwitchDefault>{{
+                        severityText(res.severity) | translate
+                    }}</span>
+                </clr-dg-cell>
+                <clr-dg-cell class="file-cell">{{ location(res) }}</clr-dg-cell>
+                <clr-dg-cell class="finding-message">{{
+                    res.message
+                }}</clr-dg-cell>
+                <clr-dg-cell>{{ res.scanner }}</clr-dg-cell>
+                <clr-dg-row-detail *clrIfExpanded>
+                    <div>
+                        @if (res.why) {
+                        <div>
+                            <b>{{ 'SECURITY.GRID.COLUMN_WHY' | translate }}:</b>
+                            {{ res.why }}
+                        </div>
+                        } @if (res.details) {
+                        <div class="mt-5px">
+                            <b
+                                >{{
+                                    'SECURITY.GRID.COLUMN_DETAILS' | translate
+                                }}:</b
+                            >
+                            <pre class="file-cell">{{
+                                res.details | json
+                            }}</pre>
+                        </div>
+                        }
+                    </div>
+                </clr-dg-row-detail>
+            </clr-dg-row>
+
+            <clr-dg-footer>
+                <div class="report">
+                    @if (scanner) {
+                    <i>{{
+                        'VULNERABILITY.REPORTED_BY'
+                            | translate : { scanner: getScannerInfo(scanner) }
+                    }}</i>
+                    }
+                </div>
+                <clr-dg-pagination
+                    #pagination
+                    [clrDgPageSize]="pageSize"
+                    [clrDgTotalItems]="findings?.length">
+                    <clr-dg-page-size
+                        [clrPageSizeOptions]="clrPageSizeOptions"
+                        >{{
+                            'PAGINATION.PAGE_SIZE' | translate
+                        }}</clr-dg-page-size
+                    >
+                    @if (findings?.length) {
+                    <span
+                        >{{ pagination.firstItem + 1 }} -
+                        {{ pagination.lastItem + 1 }}
+                        {{ 'VULNERABILITY.GRID.FOOT_OF' | translate }}</span
+                    >
+                    }
+                    {{ findings?.length }}
+                    {{ 'VULNERABILITY.GRID.FOOT_ITEMS' | translate }}
+                </clr-dg-pagination>
+            </clr-dg-footer>
+        </clr-datagrid>
+    </div>
+</div>

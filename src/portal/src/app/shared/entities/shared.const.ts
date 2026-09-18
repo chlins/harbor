@@ -411,6 +411,7 @@ export const stringsForClarity: Partial<ClrCommonStrings> = {
 export enum ScanTypes {
     SBOM = 'sbom',
     VULNERABILITY = 'vulnerability',
+    MODEL_SECURITY = 'model-security',
 }
 
 export const KB_TO_MB: number = 1024;

@@ -893,8 +893,20 @@ export class ArtifactListTabComponent implements OnInit, OnDestroy {
         return !!(
             this.selectedRow &&
             this.selectedRow[0] &&
-            this.selectedRow[0].addition_links &&
-            this.selectedRow[0].addition_links[ADDITIONS.VULNERABILITIES]
+            this.hasVul(this.selectedRow[0])
+        );
+    }
+
+    // the security scan of an AI model is served by a model scanner, whose presence is already
+    // reflected by the security addition link; images need the project scanner to support vulnerability scan
+    selectedRowScanSupported(): boolean {
+        if (!this.selectedRow || !this.selectedRow.length) {
+            return false;
+        }
+        return this.selectedRow.every(item =>
+            item?.addition_links?.[ADDITIONS.SECURITY]
+                ? true
+                : this.hasScannerSupportVulnerability
         );
     }
 
@@ -907,11 +919,18 @@ export class ArtifactListTabComponent implements OnInit, OnDestroy {
         );
     }
 
+    // the artifact is an AI model whose scan is a model security scan
+    isModel(artifact: Artifact): boolean {
+        return !!artifact?.addition_links?.[ADDITIONS.SECURITY];
+    }
+
+    // the artifact has a security scan report: vulnerabilities for images, security for AI models
     hasVul(artifact: Artifact): boolean {
         return !!(
             artifact &&
             artifact.addition_links &&
-            artifact.addition_links[ADDITIONS.VULNERABILITIES]
+            (artifact.addition_links[ADDITIONS.VULNERABILITIES] ||
+                artifact.addition_links[ADDITIONS.SECURITY])
         );
     }
 

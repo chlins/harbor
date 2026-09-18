@@ -287,11 +287,11 @@
         "PREVENT_VULNERABLE_1": "Güvenlik açığı ciddiyeti olan imajları önleyin",
         "PREVENT_VULNERABLE_2": "ve yukarıda yüklenilmekte.",
         "SCAN": "Güvenlik açığı taraması",
-        "AUTOSCAN_TOGGLE": "İmajları yüklerken anında tarayın",
-        "AUTOSCAN_POLICY": "İmajlar proje kayıt defterine yüklenildiğinde otomatik olarak tarayın.",
+        "AUTOSCAN_TOGGLE": "Yüklemede yapıtları otomatik tara",
+        "AUTOSCAN_POLICY": "İmajlar ve yapay zeka modelleri proje kayıt defterine yüklendiğinde otomatik olarak tarayın.",
         "SBOM": "SBOM generation",
         "AUTOSBOM_TOGGLE": "Push'ta otomatik SBOM oluştur",
-        "AUTOSBOM_POLICY": "İmajlar proje kayıt defterine yüklenildiğinde otomatik olarak SBOM oluşturun.",
+        "AUTOSBOM_POLICY": "İmajlar ve yapay zeka modelleri proje kayıt defterine yüklendiğinde otomatik olarak SBOM oluşturun.",
         "CONTENT_TRUST_POLICY": "Yalnızca doğrulanmış imajların yüklenilmesine izin verin."
     },
     "MEMBER": {
@@ -811,6 +811,7 @@
         "SIZE": "Boyut",
         "VULNERABILITY": "Güvenlik Açığı",
         "SBOM": "SBOM",
+        "SECURITY": "Güvenlik",
         "BUILD_HISTORY": "Geçmişi Oluştur",
         "SIGNED": "İmzalanmış",
         "AUTHOR": "Yazar",
@@ -1484,6 +1485,20 @@
         "EXISTING_RULE": "Existing rule",
         "ACTION": "ACTION"
     },
+    "SECURITY": {
+        "SEVERITY": "Önem derecesi:",
+        "NO_FINDINGS": "Güvenlik bulgusu yok",
+        "FILES_SCANNED": "Taranan dosyalar",
+        "CHECKS": "Kontroller",
+        "GRID": {
+            "COLUMN_ID": "Bulgu",
+            "COLUMN_FILE": "Dosya",
+            "COLUMN_MESSAGE": "Mesaj",
+            "COLUMN_CHECK": "Kontrol",
+            "COLUMN_WHY": "Neden",
+            "COLUMN_DETAILS": "Ayrıntılar"
+        }
+    },
     "SCANNER": {
         "DELETION_SUMMARY": "Do you want to delete scanner {{param}}?",
         "SKIP_CERT_VERIFY": "Check this box to skip certificate verification when the remote registry uses a self-signed or untrusted certificate.",
@@ -1493,6 +1508,7 @@
         "NAME_REX": "Name should be at least 2 characters long with lower case characters, numbers and ._- and must be start with characters or numbers.",
         "DESCRIPTION": "Description",
         "SBOM": "SBOM",
+        "MODEL_SECURITY": "Model Güvenliği",
         "VULNERABILITY": "Vulnerability",
         "SUPPORTED": "Supported",
         "NOT_SUPPORTED": "Not Supported",

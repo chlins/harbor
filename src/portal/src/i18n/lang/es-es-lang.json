@@ -288,11 +288,11 @@
         "PREVENT_VULNERABLE_1": "Impedir imágenes con la gravedad de la vulnerabilidad de",
         "PREVENT_VULNERABLE_2": "y más arriba de ser desplegado.",
         "SCAN": "Escaneo de vulnerabilidad",
-        "AUTOSCAN_TOGGLE": "Escanee automáticamente las imágenes al instante",
-        "AUTOSCAN_POLICY": "Escanee automáticamente las imágenes cuando son enviadas al registro del proyecto.",
+        "AUTOSCAN_TOGGLE": "Escanear artefactos automáticamente al enviar",
+        "AUTOSCAN_POLICY": "Escanee automáticamente las imágenes y los modelos de IA cuando son enviados al registro del proyecto.",
         "SBOM": "generación de SBOM",
         "AUTOSBOM_TOGGLE": "Generar SBOM automáticamente en push",
-        "AUTOSBOM_POLICY": "Generar SBOM automáticamente cuando las imágenes se envían al registro del proyecto.",
+        "AUTOSBOM_POLICY": "Generar SBOM automáticamente cuando las imágenes y los modelos de IA se envían al registro del proyecto.",
         "CONTENT_TRUST_POLICY": "Solo permita la implementación de imágenes verificadas."
     },
     "MEMBER": {
@@ -814,6 +814,7 @@
         "SIZE": "Tamaño",
         "VULNERABILITY": "Vulnerabilidades",
         "SBOM": "SBOM",
+        "SECURITY": "Seguridad",
         "BUILD_HISTORY": "Construir Historia",
         "SIGNED": "Firmada",
         "AUTHOR": "Autor",
@@ -1487,6 +1488,20 @@
         "EXISTING_RULE": "Regla existente",
         "ACTION": "ACCION"
     },
+    "SECURITY": {
+        "SEVERITY": "Severidad:",
+        "NO_FINDINGS": "Sin hallazgos de seguridad",
+        "FILES_SCANNED": "Archivos escaneados",
+        "CHECKS": "Comprobaciones",
+        "GRID": {
+            "COLUMN_ID": "Hallazgo",
+            "COLUMN_FILE": "Archivo",
+            "COLUMN_MESSAGE": "Mensaje",
+            "COLUMN_CHECK": "Comprobación",
+            "COLUMN_WHY": "Motivo",
+            "COLUMN_DETAILS": "Detalles"
+        }
+    },
     "SCANNER": {
         "DELETION_SUMMARY": "¿Quieres eliminar el escáner {{param}}?",
         "SKIP_CERT_VERIFY": "Marque esta casilla para omitir la verificación del certificado cuando el registro remoto utiliza un certificado autofirmado o no confiable.",
@@ -1496,6 +1511,7 @@
         "NAME_REX": "El nombre debe tener al menos 2 caracteres, con minúsculas, números y ._-, y debe comenzar con caracteres o números.",
         "DESCRIPTION": "Descripción",
         "SBOM": "SBOM",
+        "MODEL_SECURITY": "Seguridad del modelo",
         "VULNERABILITY": "Vulnerabilidad",
         "SUPPORTED": "Apoyado",
         "NOT_SUPPORTED": "No compatible",

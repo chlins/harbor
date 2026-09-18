@@ -287,11 +287,11 @@
         "PREVENT_VULNERABLE_1": "阻止具有",
         "PREVENT_VULNERABLE_2": "或更高嚴重性的映像檔部署。",
         "SCAN": "弱點掃描",
-        "AUTOSCAN_TOGGLE": "推送時自動掃描映像檔",
-        "AUTOSCAN_POLICY": "當映像檔推送到專案儲存庫時自動掃描。",
+        "AUTOSCAN_TOGGLE": "推送時自動掃描產物",
+        "AUTOSCAN_POLICY": "當映像檔或 AI 模型推送到專案儲存庫時自動掃描。",
         "SBOM": "產生 SBOM",
         "AUTOSBOM_TOGGLE": "推送時自動產生 SBOM",
-        "AUTOSBOM_POLICY": "當映像檔推送到專案儲存庫時自動產生 SBOM。",
+        "AUTOSBOM_POLICY": "當映像檔或 AI 模型推送到專案儲存庫時自動產生 SBOM。",
         "CONTENT_TRUST_POLICY": "只允許部署已驗證的映像檔。"
     },
     "MEMBER": {
@@ -811,6 +811,7 @@
         "SIZE": "大小",
         "VULNERABILITY": "弱點",
         "SBOM": "SBOM",
+        "SECURITY": "安全",
         "BUILD_HISTORY": "建置歷史",
         "SIGNED": "已簽署",
         "AUTHOR": "作者",
@@ -1485,6 +1486,20 @@
         "EXISTING_RULE": "既有規則",
         "ACTION": "操作"
     },
+    "SECURITY": {
+        "SEVERITY": "嚴重程度：",
+        "NO_FINDINGS": "未發現安全問題",
+        "FILES_SCANNED": "已掃描檔案",
+        "CHECKS": "檢查項",
+        "GRID": {
+            "COLUMN_ID": "問題",
+            "COLUMN_FILE": "檔案",
+            "COLUMN_MESSAGE": "描述",
+            "COLUMN_CHECK": "檢查",
+            "COLUMN_WHY": "原因",
+            "COLUMN_DETAILS": "詳情"
+        }
+    },
     "SCANNER": {
         "DELETION_SUMMARY": "確定要刪除掃描器 {{param}} 嗎？",
         "SKIP_CERT_VERIFY": "當遠端 Registry 使用自簽章或不受信任的憑證時，勾選此方塊可略過憑證驗證。",
@@ -1494,6 +1509,7 @@
         "NAME_REX": "名稱長度應至少 2 個字元，可包含小寫字母、數字及 ._-，且必須以字母或數字開頭。",
         "DESCRIPTION": "描述",
         "SBOM": "SBOM",
+        "MODEL_SECURITY": "模型安全",
         "VULNERABILITY": "弱點",
         "SUPPORTED": "支援",
         "NOT_SUPPORTED": "不支援",

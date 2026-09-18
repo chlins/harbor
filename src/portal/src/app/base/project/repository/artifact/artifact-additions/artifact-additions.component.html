@@ -28,6 +28,27 @@
                 </clr-tab-content>
             </ng-template>
         </clr-tab>
+        } @if (getSecurity()) {
+        <clr-tab>
+            <button clrTabLink id="security" (click)="actionTab('security')">
+                {{ 'REPOSITORY.SECURITY' | translate }}
+            </button>
+            <ng-template [clrIfActive]="currentTabLinkId === 'security'">
+                <clr-tab-content id="security-content">
+                    @if (currentTabLinkId === 'security') {
+                    <hbr-artifact-security
+                        [artifact]="artifact"
+                        [projectName]="projectName"
+                        [projectId]="projectId"
+                        [repoName]="repoName"
+                        [scanBtnState]="getScanBtnState()"
+                        [hasEnabledScanner]="hasEnabledScanner()"
+                        [digest]="digest"
+                        [securityLink]="getSecurity()"></hbr-artifact-security>
+                    }
+                </clr-tab-content>
+            </ng-template>
+        </clr-tab>
         } @if (hasScannerSupportSBOM()) {
         <clr-tab>
             <button clrTabLink id="sbom" (click)="actionTab('sbom')">
