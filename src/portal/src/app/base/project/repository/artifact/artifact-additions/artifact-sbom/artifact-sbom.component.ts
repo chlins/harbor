@@ -222,7 +222,7 @@ export class ArtifactSbomComponent implements OnInit, OnDestroy {
         ) {
             downloadJson(
                 this.artifactSbom.sbomJsonRaw,
-                `${this.artifactSbom.sbomName}.json`
+                `${this.artifactSbom.sbomName.replace(/[/:@]/g, '_')}.json`
             );
         }
         this.downloadSbomBtnState = ClrLoadingState.DEFAULT;

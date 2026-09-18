@@ -185,6 +185,7 @@ export enum Clients {
 
 export enum ArtifactSbomType {
     SPDX = 'SPDX',
+    CYCLONEDX = 'CycloneDX',
 }
 
 export interface ArtifactSbomPackageItem {
@@ -221,6 +222,42 @@ export const ArtifactSbomFieldMapper = {
         packages: ['name', 'versionInfo', 'licenseConcluded'],
     },
 };
+
+/**
+ * The CycloneDX field mapper: components are mapped to the same package shape as SPDX so the
+ * SBOM tab renders both formats. The version of a component defaults to its SHA-256 hash for
+ * model files, the license to the first license expression / id.
+ */
+export const ArtifactCycloneDxFieldMapper = {
+    sbomVersion: 'specVersion',
+    sbomName: 'metadata.component.name',
+    sbomId: 'serialNumber',
+    sbomCreated: 'metadata.timestamp',
+};
+
+/**
+ * Identify a CycloneDX JSON BOM by its 'bomFormat' property.
+ */
+export function isCycloneDxSbom(sbomJson?: Object): boolean {
+    return sbomJson?.['bomFormat'] === 'CycloneDX';
+}
+
+function cycloneDxPackages(sbomJson: Object): ArtifactSbomPackageItem[] {
+    const components: any[] = sbomJson?.['components'] ?? [];
+    return components.map(c => {
+        const hash = (c?.hashes ?? []).find(h => h?.alg === 'SHA-256');
+        const license = (c?.licenses ?? [])
+            .map(l => l?.expression ?? l?.license?.id ?? l?.license?.name)
+            .filter(l => !!l)
+            .join(', ');
+        return <ArtifactSbomPackageItem>{
+            name: c?.name,
+            versionInfo:
+                c?.version ?? (hash?.content ? `sha256:${hash.content}` : ''),
+            licenseConcluded: license,
+        };
+    });
+}
 
 /**
  * Identify the sbomJson contains the two main properties 'spdxVersion' and 'SPDXID'.
@@ -370,6 +407,31 @@ export function getArtifactSbom(sbomJson?: Object): ArtifactSbom {
                     )
                 );
             });
+            return artifactSbom;
+        }
+        if (isCycloneDxSbom(sbomJson)) {
+            const artifactSbom = <ArtifactSbom>{};
+            artifactSbom.sbomJsonRaw = sbomJson;
+            artifactSbom.sbomType = ArtifactSbomType.CYCLONEDX;
+            const fields = Object.getOwnPropertyNames(
+                ArtifactCycloneDxFieldMapper
+            );
+            fields.forEach(field => {
+                updateObjectWithFieldPath(
+                    field,
+                    artifactSbom,
+                    readDataFromArtifactSbomJson(
+                        ArtifactCycloneDxFieldMapper[field],
+                        sbomJson
+                    )
+                );
+            });
+            if (!artifactSbom.sbomName) {
+                artifactSbom.sbomName = 'sbom';
+            }
+            artifactSbom.sbomPackage = {
+                packages: cycloneDxPackages(sbomJson),
+            };
             return artifactSbom;
         }
     }

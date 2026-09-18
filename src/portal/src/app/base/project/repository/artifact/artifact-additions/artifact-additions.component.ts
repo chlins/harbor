@@ -61,6 +61,8 @@ export class ArtifactAdditionsComponent implements AfterViewChecked, OnInit {
 
         if (!this.activeTab && this.additionLinks[ADDITIONS.VULNERABILITIES]) {
             this.currentTabLinkId = 'vulnerability';
+        } else if (!this.activeTab && this.additionLinks[ADDITIONS.SECURITY]) {
+            this.currentTabLinkId = 'security';
         } else if (!this.activeTab && this.additionLinks[ADDITIONS.SUMMARY]) {
             this.currentTabLinkId = 'summary-link';
         }
@@ -89,6 +91,13 @@ export class ArtifactAdditionsComponent implements AfterViewChecked, OnInit {
             this.additionLinks[ADDITIONS.VULNERABILITIES]
         ) {
             return this.additionLinks[ADDITIONS.VULNERABILITIES];
+        }
+        return null;
+    }
+
+    getSecurity(): AdditionLink {
+        if (this.additionLinks && this.additionLinks[ADDITIONS.SECURITY]) {
+            return this.additionLinks[ADDITIONS.SECURITY];
         }
         return null;
     }

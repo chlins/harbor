@@ -52,6 +52,9 @@
                         : scannerMetadata?.capabilities[i]?.type ===
                           'vulnerability'
                         ? 'SCANNER.VULNERABILITY'
+                        : scannerMetadata?.capabilities[i]?.type ===
+                          'model-security'
+                        ? 'SCANNER.MODEL_SECURITY'
                         : scannerMetadata?.capabilities[i]?.type
                     ) | translate
                 }}

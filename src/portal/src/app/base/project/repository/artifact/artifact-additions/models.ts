@@ -27,6 +27,8 @@ export interface Addition {
 
 export enum ADDITIONS {
     VULNERABILITIES = 'vulnerabilities',
+    // the model security report of AI model artifacts, served by the vulnerabilities endpoint
+    SECURITY = 'security',
     BUILD_HISTORY = 'build_history',
     SUMMARY = 'readme.md',
     VALUES = 'values.yaml',
@@ -34,4 +36,35 @@ export enum ADDITIONS {
     SBOMS = 'sboms',
     LICENSE = 'license',
     FILES = 'files',
+}
+
+export interface ModelSecurityFinding {
+    id: string;
+    severity: string;
+    message: string;
+    why?: string;
+    file?: string;
+    location?: string;
+    scanner?: string;
+    details?: object;
+    links?: string[];
+}
+
+export interface ModelSecuritySummary {
+    total: number;
+    critical: number;
+    high: number;
+    medium: number;
+    low: number;
+    files_scanned: number;
+    bytes_scanned: number;
+    scanners?: string[];
+}
+
+export interface ModelSecurityReport {
+    generated_at: string;
+    scanner: { name: string; vendor: string; version: string };
+    severity: string;
+    summary?: ModelSecuritySummary;
+    findings: ModelSecurityFinding[];
 }

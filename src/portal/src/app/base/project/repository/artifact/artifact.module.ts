@@ -29,6 +29,7 @@ import { ArtifactVulnerabilitiesComponent } from './artifact-additions/artifact-
 import { ArtifactFilesComponent } from './artifact-additions/files/files.component';
 import { ArtifactLicenseComponent } from './artifact-additions/license/license.component';
 import { ArtifactSbomComponent } from './artifact-additions/artifact-sbom/artifact-sbom.component';
+import { ArtifactSecurityComponent } from './artifact-additions/artifact-security/artifact-security.component';
 import { ArtifactDefaultService, ArtifactService } from './artifact.service';
 import { ArtifactDetailRoutingResolverService } from '../../../../services/routing-resolvers/artifact-detail-routing-resolver.service';
 import { ResultBarChartComponent } from './vulnerability-scanning/result-bar-chart.component';
@@ -101,6 +102,7 @@ const routes: Routes = [
         DependenciesComponent,
         BuildHistoryComponent,
         ArtifactSbomComponent,
+        ArtifactSecurityComponent,
         ArtifactVulnerabilitiesComponent,
         ResultBarChartComponent,
         ResultSbomComponent,
