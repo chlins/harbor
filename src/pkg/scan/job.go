@@ -369,7 +369,7 @@ func ExtractScanReq(params job.Parameters) (*v1.ScanRequest, error) {
 			return nil, errors.Errorf("failed to get scan handler, request type %v", reqType)
 		}
 		req.RequestType[0].ProducesMimeTypes = handler.RequestProducesMineTypes()
-		req.RequestType[0].Parameters = handler.RequestParameters()
+		req.RequestType[0].Parameters = handler.RequestParameters(req)
 	}
 	return req, nil
 }

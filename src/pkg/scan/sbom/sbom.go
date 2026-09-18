@@ -45,9 +45,22 @@ import (
 )
 
 const (
-	sbomMimeType      = "application/vnd.goharbor.harbor.sbom.v1"
+	sbomMimeType = "application/vnd.goharbor.harbor.sbom.v1"
+	// sbomMediaTypeSpdx is the SBOM format generated for container images
 	sbomMediaTypeSpdx = "application/spdx+json"
+	// sbomMediaTypeCycloneDX is the SBOM format generated for AI model artifacts
+	sbomMediaTypeCycloneDX = "application/vnd.cyclonedx+json"
+	// annotationSBOMMediaType records the format of the SBOM on the accessory artifact
+	annotationSBOMMediaType = "io.goharbor.sbom.media-type"
 )
+
+// sbomMediaType returns the SBOM format expected for the artifact identified by the scan mime type.
+func sbomMediaType(artifactMimeType string) string {
+	if v1.IsModelMimeType(artifactMimeType) {
+		return sbomMediaTypeCycloneDX
+	}
+	return sbomMediaTypeSpdx
+}
 
 func init() {
 	scan.RegisterScanHanlder(v1.ScanTypeSbom, &scanHandler{
@@ -78,15 +91,25 @@ func (h *scanHandler) RequestProducesMineTypes() []string {
 }
 
 // RequestParameters defines the parameters for scan request
-func (h *scanHandler) RequestParameters() map[string]any {
-	return map[string]any{"sbom_media_types": []string{sbomMediaTypeSpdx}}
+func (h *scanHandler) RequestParameters(sr *v1.ScanRequest) map[string]any {
+	return map[string]any{"sbom_media_types": []string{sbomMediaType(artifactMimeType(sr))}}
+}
+
+func artifactMimeType(sr *v1.ScanRequest) string {
+	if sr == nil || sr.Artifact == nil {
+		return ""
+	}
+	return sr.Artifact.MimeType
 }
 
 // PostScan defines task specific operations after the scan is complete
 func (h *scanHandler) PostScan(ctx job.Context, sr *v1.ScanRequest, _ *scanModel.Report, rawReport string, startTime time.Time, robot *model.Robot) (string, error) {
-	sbomContent, s, err := retrieveSBOMContent(rawReport)
+	sbomContent, s, mediaType, err := retrieveSBOMContent(rawReport)
 	if err != nil {
 		return "", err
+	}
+	if mediaType == "" {
+		mediaType = sbomMediaType(artifactMimeType(sr))
 	}
 	scanReq := v1.ScanRequest{
 		Registry: sr.Registry,
@@ -101,7 +124,7 @@ func (h *scanHandler) PostScan(ctx job.Context, sr *v1.ScanRequest, _ *scanModel
 	}
 	myLogger := ctx.GetLogger()
 	myLogger.Debugf("Pushing accessory artifact to %s/%s", scanReq.Registry.URL, scanReq.Artifact.Repository)
-	dgst, err := h.GenAccessoryFunc(scanReq, sbomContent, h.annotations(), sbomMimeType, robot)
+	dgst, err := h.GenAccessoryFunc(scanReq, sbomContent, h.annotations(mediaType), sbomMimeType, robot)
 	if err != nil {
 		myLogger.Errorf("error when create accessory from image %v", err)
 		return "", err
@@ -110,8 +133,8 @@ func (h *scanHandler) PostScan(ctx job.Context, sr *v1.ScanRequest, _ *scanModel
 }
 
 // URLParameter defines the parameters for scan report url
-func (h *scanHandler) URLParameter(_ *v1.ScanRequest) (string, error) {
-	return fmt.Sprintf("sbom_media_type=%s", url.QueryEscape(sbomMediaTypeSpdx)), nil
+func (h *scanHandler) URLParameter(sr *v1.ScanRequest) (string, error) {
+	return fmt.Sprintf("sbom_media_type=%s", url.QueryEscape(sbomMediaType(artifactMimeType(sr)))), nil
 }
 
 // RequiredPermissions defines the permission used by the scan robot account
@@ -133,13 +156,18 @@ func (h *scanHandler) RequiredPermissions() []*types.Policy {
 }
 
 // annotations defines the annotations for the accessory artifact
-func (h *scanHandler) annotations() map[string]string {
+func (h *scanHandler) annotations(mediaType string) map[string]string {
 	t := time.Now().Format(time.RFC3339)
+	description := "SPDX JSON SBOM"
+	if mediaType == sbomMediaTypeCycloneDX {
+		description = "CycloneDX JSON SBOM"
+	}
 	return map[string]string{
 		"created":                             t,
 		"created-by":                          "Harbor",
 		"org.opencontainers.artifact.created": t,
-		"org.opencontainers.artifact.description": "SPDX JSON SBOM",
+		"org.opencontainers.artifact.description": description,
+		annotationSBOMMediaType:                   mediaType,
 	}
 }
 
@@ -168,23 +196,24 @@ func (h *scanHandler) Update(ctx context.Context, uuid string, report string) er
 	return nil
 }
 
-// retrieveSBOMContent retrieves the "sbom" field from the raw report
-func retrieveSBOMContent(rawReport string) ([]byte, *v1.Scanner, error) {
+// retrieveSBOMContent retrieves the "sbom" field, the scanner and the media type from the raw report
+func retrieveSBOMContent(rawReport string) ([]byte, *v1.Scanner, string, error) {
 	rpt := sbom.RawSBOMReport{}
 	err := json.Unmarshal([]byte(rawReport), &rpt)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, "", err
 	}
 	sbomContent, err := json.Marshal(rpt.SBOM)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, "", err
 	}
-	return sbomContent, rpt.Scanner, nil
+	return sbomContent, rpt.Scanner, rpt.MediaType, nil
 }
 
 func (h *scanHandler) MakePlaceHolder(ctx context.Context, art *artifact.Artifact, r *scanner.Registration) (rps []*scanModel.Report, err error) {
 	mgr := h.SBOMMgrFunc()
-	mimeTypes := r.GetProducesMimeTypes(scan.ArtifactMimeType(art), v1.ScanTypeSbom)
+	artifactMimeType := scan.ArtifactMimeType(art)
+	mimeTypes := r.GetProducesMimeTypes(artifactMimeType, v1.ScanTypeSbom)
 	if len(mimeTypes) == 0 {
 		return nil, errors.New("no mime types to make report placeholders")
 	}
@@ -197,7 +226,7 @@ func (h *scanHandler) MakePlaceHolder(ctx context.Context, art *artifact.Artifac
 			ArtifactID:       art.ID,
 			RegistrationUUID: r.UUID,
 			MimeType:         mt,
-			MediaType:        sbomMediaTypeSpdx,
+			MediaType:        sbomMediaType(artifactMimeType),
 		}
 
 		create := func(ctx context.Context) error {
@@ -225,7 +254,7 @@ func (h *scanHandler) MakePlaceHolder(ctx context.Context, art *artifact.Artifac
 // delete deletes the sbom report and accessory
 func (h *scanHandler) delete(ctx context.Context, art *artifact.Artifact, mimeTypes string, r *scanner.Registration) error {
 	mgr := h.SBOMMgrFunc()
-	sbomReports, err := mgr.GetBy(h.cloneCtx(ctx), art.ID, r.UUID, mimeTypes, sbomMediaTypeSpdx)
+	sbomReports, err := mgr.GetBy(h.cloneCtx(ctx), art.ID, r.UUID, mimeTypes, "")
 	if err != nil {
 		return err
 	}
@@ -280,7 +309,7 @@ func (h *scanHandler) GetPlaceHolder(ctx context.Context, artRepo string, artDig
 		return nil, err
 	}
 	mgr := h.SBOMMgrFunc()
-	rpts, err := mgr.GetBy(ctx, a.ID, scannerUUID, mimeType, sbomMediaTypeSpdx)
+	rpts, err := mgr.GetBy(ctx, a.ID, scannerUUID, mimeType, "")
 	if err != nil {
 		logger.Errorf("Failed to get report for artifact %s@%s of mimetype %s, error %v", artRepo, artDigest, mimeType, err)
 		return nil, err
@@ -310,7 +339,7 @@ func (h *scanHandler) GetSummary(ctx context.Context, art *artifact.Artifact, mi
 	if r == nil {
 		return map[string]any{}, nil
 	}
-	reports, err := h.SBOMMgrFunc().GetBy(ctx, art.ID, r.UUID, mimeTypes[0], sbomMediaTypeSpdx)
+	reports, err := h.SBOMMgrFunc().GetBy(ctx, art.ID, r.UUID, mimeTypes[0], "")
 	if err != nil {
 		return nil, err
 	}

@@ -159,17 +159,17 @@ func (_m *Handler) PostScan(ctx job.Context, sr *v1.ScanRequest, rp *scan.Report
 	return r0, r1
 }
 
-// RequestParameters provides a mock function with no fields
-func (_m *Handler) RequestParameters() map[string]interface{} {
-	ret := _m.Called()
+// RequestParameters provides a mock function with given fields: sr
+func (_m *Handler) RequestParameters(sr *v1.ScanRequest) map[string]interface{} {
+	ret := _m.Called(sr)
 
 	if len(ret) == 0 {
 		panic("no return value specified for RequestParameters")
 	}
 
 	var r0 map[string]interface{}
-	if rf, ok := ret.Get(0).(func() map[string]interface{}); ok {
-		r0 = rf()
+	if rf, ok := ret.Get(0).(func(*v1.ScanRequest) map[string]interface{}); ok {
+		r0 = rf(sr)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(map[string]interface{})
